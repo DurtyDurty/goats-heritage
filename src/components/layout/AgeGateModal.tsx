@@ -7,15 +7,12 @@ export default function AgeGateModal() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    const verified = document.cookie
-      .split("; ")
-      .some((c) => c.startsWith("goats_age_gate=verified"));
+    const verified = sessionStorage.getItem("goats_age_gate");
     if (!verified) setVisible(true);
   }, []);
 
   function handleConfirm() {
-    // Session cookie — expires when browser is closed
-    document.cookie = "goats_age_gate=verified; path=/";
+    sessionStorage.setItem("goats_age_gate", "verified");
     setVisible(false);
   }
 

@@ -11,6 +11,7 @@ import { redirectToCheckout } from "@/lib/checkout";
 export default function CartDrawer() {
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [checkoutError, setCheckoutError] = useState("");
+  const [ageConfirmed, setAgeConfirmed] = useState(false);
   const {
     items,
     isLoaded,
@@ -165,12 +166,26 @@ export default function CartDrawer() {
                 </span>
               </div>
 
+              <label className="mt-4 flex items-start gap-2 text-xs text-[#A3A3A3]">
+                <input
+                  type="checkbox"
+                  checked={ageConfirmed}
+                  onChange={(e) => setAgeConfirmed(e.target.checked)}
+                  className="mt-0.5 accent-[#C8A84E]"
+                />
+                I confirm that I am 21 years of age or older and legally permitted to purchase tobacco products.
+              </label>
+
               {checkoutError && (
                 <p className="mt-2 text-sm text-[#EF4444]">{checkoutError}</p>
               )}
 
               <button
                 onClick={async () => {
+                  if (!ageConfirmed) {
+                    setCheckoutError("You must confirm you are 21 or older.");
+                    return;
+                  }
                   setCheckoutError("");
                   setCheckoutLoading(true);
                   try {
@@ -180,7 +195,7 @@ export default function CartDrawer() {
                     setCheckoutLoading(false);
                   }
                 }}
-                disabled={checkoutLoading}
+                disabled={checkoutLoading || !ageConfirmed}
                 className="mt-4 block w-full rounded-lg bg-[#C8A84E] py-4 text-center font-bold text-black transition-colors hover:bg-[#E8D48B] disabled:opacity-50"
               >
                 {checkoutLoading ? "Redirecting..." : "Proceed to Checkout"}
