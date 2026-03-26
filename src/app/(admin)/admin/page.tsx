@@ -17,12 +17,12 @@ export default async function AdminDashboard() {
       supabase.from("subscriptions").select("id, tier, status, created_at, user_id, profiles(full_name, email)").order("created_at", { ascending: false }).limit(5),
     ]);
 
-  const totalRevenue = (revenueRes.data || []).reduce((sum, o) => sum + o.total_cents, 0);
+  const totalRevenue = (revenueRes.data as any[] || []).reduce((sum: number, o: any) => sum + o.total_cents, 0);
   const activeSubscribers = subscribersRes.count || 0;
   const pendingOrders = pendingRes.count || 0;
   const upcomingEvents = eventsRes.count || 0;
-  const recentOrders = recentOrdersRes.data || [];
-  const recentSubs = recentSubsRes.data || [];
+  const recentOrders = (recentOrdersRes.data || []) as any[];
+  const recentSubs = (recentSubsRes.data || []) as any[];
 
   const today = new Date().toLocaleDateString("en-US", {
     weekday: "long",
