@@ -1,11 +1,22 @@
 // TODO: Generate database types by running:
-// npx supabase gen types typescript --project-id <your-project-id> > src/lib/supabase/types.ts
+// npx supabase gen types typescript --project-id lixyenbgoxgggbuvudkg > src/lib/supabase/types.ts
 
+// Permissive placeholder until generated types are available
 export type Database = {
   public: {
-    Tables: Record<string, never>;
-    Views: Record<string, never>;
-    Functions: Record<string, never>;
-    Enums: Record<string, never>;
+    Tables: {
+      [key: string]: {
+        Row: Record<string, any>;
+        Insert: Record<string, any>;
+        Update: Record<string, any>;
+      };
+    };
+    Views: {
+      [key: string]: {
+        Row: Record<string, any>;
+      };
+    };
+    Functions: Record<string, any>;
+    Enums: Record<string, any>;
   };
 };
