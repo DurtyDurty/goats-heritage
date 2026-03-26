@@ -25,7 +25,7 @@ export function shippingUpdate({
           <!-- Header -->
           <tr>
             <td style="padding: 32px 40px; text-align: center; border-bottom: 1px solid #2A2A2A;">
-              <img src="https://goats-heritage.vercel.app/images/logo.png" alt="Goats Heritage" height="80" style="display:block;margin:0 auto 16px auto;height:80px;width:auto;" />
+              <img src="https://goats-heritage.vercel.app/images/logo.webp" alt="Goats Heritage" height="80" style="display:block;margin:0 auto 16px auto;height:80px;width:auto;" />
               <h1 style="margin: 0; font-family: sans-serif; font-size: 24px; font-weight: 700; letter-spacing: 3px; color: #C8A84E;">GOATS HERITAGE</h1>
             </td>
           </tr>

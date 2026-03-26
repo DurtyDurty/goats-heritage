@@ -42,7 +42,7 @@ export default function HomePage() {
 
         <div className="relative z-10 px-4 text-center">
           <div className="animate-fade-in">
-            <Image src="/images/logo.png" alt="Goats Heritage" width={150} height={150} className="mx-auto h-36 w-auto" />
+            <Image src="/images/logo.webp" alt="Goats Heritage" width={150} height={150} className="mx-auto h-36 w-auto" />
           </div>
           <p className="mt-8 text-xs font-medium uppercase tracking-[0.3em] text-[#C8A84E]">
             Premium Cigars &amp; Lifestyle

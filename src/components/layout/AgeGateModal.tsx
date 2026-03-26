@@ -25,7 +25,7 @@ export default function AgeGateModal() {
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-sm animate-fade-in">
       <div className="mx-4 w-full max-w-md rounded-xl border border-[#262626] bg-[#141414] p-8 text-center">
-        <Image src="/images/logo.png" alt="Goats Heritage" width={120} height={120} className="mx-auto h-28 w-auto" />
+        <Image src="/images/logo.webp" alt="Goats Heritage" width={120} height={120} className="mx-auto h-28 w-auto" />
         <div className="flex items-center justify-center gap-1.5">
           <span className="text-lg font-bold tracking-wider text-[#C8A84E]">GOATS</span>
           <span className="text-[#C8A84E]">&middot;</span>

@@ -89,7 +89,7 @@ export default function Navbar() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-1.5">
             <span className="text-lg font-bold tracking-wider text-[#C8A84E]">GOATS</span>
-            <Image src="/images/logo.png" width={36} height={36} alt="Goats Heritage" className="h-8 w-auto sm:h-9" />
+            <Image src="/images/logo.webp" width={36} height={36} alt="Goats Heritage" className="h-8 w-auto sm:h-9" />
             <span className="text-lg font-bold tracking-wider text-[#C8A84E]">HERITAGE</span>
           </Link>
 
@@ -190,7 +190,7 @@ export default function Navbar() {
               className="flex items-center gap-1.5"
             >
               <span className="text-lg font-bold tracking-wider text-[#C8A84E]">GOATS</span>
-              <Image src="/images/logo.png" width={36} height={36} alt="Goats Heritage" className="h-7 w-auto" />
+              <Image src="/images/logo.webp" width={36} height={36} alt="Goats Heritage" className="h-7 w-auto" />
               <span className="text-lg font-bold tracking-wider text-[#C8A84E]">HERITAGE</span>
             </Link>
             <button

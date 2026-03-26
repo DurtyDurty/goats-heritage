@@ -11,8 +11,8 @@ export const metadata: Metadata = {
   description:
     "Premium cigars, curated memberships, and exclusive lifestyle products. Elevating tradition with sophistication for the modern connoisseur.",
   icons: {
-    icon: "/images/logo.png",
-    apple: "/images/logo.png",
+    icon: "/images/logo.webp",
+    apple: "/images/logo.webp",
   },
 };
 
