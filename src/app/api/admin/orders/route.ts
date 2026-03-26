@@ -4,6 +4,7 @@ export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { verifyAdmin } from "@/lib/admin-auth";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { sendShippingUpdate } from "@/lib/email/send";
 
 export async function GET(request: Request) {
   const admin = await verifyAdmin();
@@ -46,5 +47,23 @@ export async function PATCH(request: Request) {
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  // Send shipping update email when order is marked as shipped with tracking
+  if (status === "shipped" && tracking_number && data?.user_id) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("email, full_name")
+      .eq("id", data.user_id)
+      .single();
+
+    if (profile?.email) {
+      await sendShippingUpdate(profile.email, {
+        orderNumber: data.id,
+        trackingNumber: tracking_number,
+        customerName: profile.full_name || "Valued Customer",
+      });
+    }
+  }
+
   return NextResponse.json({ order: data });
 }

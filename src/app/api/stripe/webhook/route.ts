@@ -5,6 +5,12 @@ import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { stripe } from "@/lib/stripe/client";
 import { createAdminClient } from "@/lib/supabase/admin";
+import {
+  sendOrderConfirmation,
+  sendSubscriptionWelcome,
+  sendSubscriptionRenewal,
+  sendPaymentFailed,
+} from "@/lib/email/send";
 import type Stripe from "stripe";
 
 export async function POST(request: Request) {
@@ -92,6 +98,54 @@ export async function POST(request: Request) {
               p_quantity: item.quantity,
             });
           }
+
+          // Send order confirmation email
+          const { data: paymentProfile } = await supabase
+            .from("profiles")
+            .select("email, full_name")
+            .eq("id", userId)
+            .single();
+
+          if (paymentProfile?.email) {
+            // Fetch product names for the email
+            const productIds = orderItems.map((i) => i.product_id);
+            const { data: products } = await supabase
+              .from("products")
+              .select("id, name")
+              .in("id", productIds);
+
+            const productMap = new Map(
+              (products || []).map((p) => [p.id, p.name])
+            );
+
+            const emailItems = orderItems.map((item) => ({
+              name: productMap.get(item.product_id) || "Product",
+              qty: item.quantity,
+              price: item.price_cents,
+            }));
+
+            const shippingAddr = session.shipping_details?.address;
+            const addressStr = shippingAddr
+              ? [
+                  shippingAddr.line1,
+                  shippingAddr.line2,
+                  shippingAddr.city,
+                  shippingAddr.state,
+                  shippingAddr.postal_code,
+                  shippingAddr.country,
+                ]
+                  .filter(Boolean)
+                  .join(", ")
+              : "N/A";
+
+            await sendOrderConfirmation(paymentProfile.email, {
+              orderNumber: order.id,
+              items: emailItems,
+              total: totalCents,
+              shippingAddress: addressStr,
+              customerName: paymentProfile.full_name || "Valued Customer",
+            });
+          }
         }
 
         if (session.mode === "subscription") {
@@ -124,6 +178,20 @@ export async function POST(request: Request) {
             .from("profiles")
             .update({ role: "member" })
             .eq("id", userId);
+
+          // Send subscription welcome email
+          const { data: subProfile } = await supabase
+            .from("profiles")
+            .select("email, full_name")
+            .eq("id", userId)
+            .single();
+
+          if (subProfile?.email) {
+            await sendSubscriptionWelcome(subProfile.email, {
+              customerName: subProfile.full_name || "Valued Customer",
+              tier: session.metadata?.tier || "monthly_box",
+            });
+          }
         }
 
         break;
@@ -154,6 +222,31 @@ export async function POST(request: Request) {
             ).toISOString(),
           })
           .eq("stripe_subscription_id", sub.id);
+
+        if (sub.status === "active") {
+          // Send subscription renewal email
+          const { data: renewalProfile } = await supabase
+            .from("profiles")
+            .select("email, full_name")
+            .eq("id", existing.user_id)
+            .single();
+
+          const { data: renewalSub } = await supabase
+            .from("subscriptions")
+            .select("tier")
+            .eq("stripe_subscription_id", sub.id)
+            .single();
+
+          if (renewalProfile?.email) {
+            await sendSubscriptionRenewal(renewalProfile.email, {
+              customerName: renewalProfile.full_name || "Valued Customer",
+              tier: renewalSub?.tier || "monthly_box",
+              nextDate: new Date(
+                sub.current_period_end * 1000
+              ).toISOString(),
+            });
+          }
+        }
 
         if (sub.status !== "active") {
           await supabase
@@ -202,6 +295,27 @@ export async function POST(request: Request) {
           .from("subscriptions")
           .update({ status: "past_due" })
           .eq("stripe_subscription_id", subscriptionId);
+
+        // Send payment failed email
+        const { data: failedSub } = await supabase
+          .from("subscriptions")
+          .select("user_id")
+          .eq("stripe_subscription_id", subscriptionId)
+          .single();
+
+        if (failedSub?.user_id) {
+          const { data: failedProfile } = await supabase
+            .from("profiles")
+            .select("email, full_name")
+            .eq("id", failedSub.user_id)
+            .single();
+
+          if (failedProfile?.email) {
+            await sendPaymentFailed(failedProfile.email, {
+              customerName: failedProfile.full_name || "Valued Customer",
+            });
+          }
+        }
 
         break;
       }
