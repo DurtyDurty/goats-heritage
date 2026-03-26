@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 const quickLinks = [
   { href: "/shop", label: "Shop" },
@@ -17,6 +18,9 @@ export default function Footer() {
   return (
     <footer className="border-t border-[#C8A84E] bg-[#141414]">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        <div className="mb-10 flex justify-center">
+          <Image src="/images/logo.png" alt="Goats Heritage" width={100} height={100} className="h-20 w-auto opacity-90 transition-opacity hover:opacity-100" />
+        </div>
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {/* Brand */}
           <div>

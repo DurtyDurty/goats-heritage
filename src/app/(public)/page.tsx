@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import ProductCard from "@/components/shop/ProductCard";
 import { MapPin } from "lucide-react";
 import { type Product } from "@/lib/types";
@@ -40,7 +41,10 @@ export default function HomePage() {
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(200,168,78,0.08)_0%,_transparent_70%)]" />
 
         <div className="relative z-10 px-4 text-center">
-          <p className="text-xs font-medium uppercase tracking-[0.3em] text-[#C8A84E]">
+          <div className="animate-fade-in">
+            <Image src="/images/logo.png" alt="Goats Heritage" width={150} height={150} className="mx-auto h-36 w-auto" />
+          </div>
+          <p className="mt-8 text-xs font-medium uppercase tracking-[0.3em] text-[#C8A84E]">
             Premium Cigars &amp; Lifestyle
           </p>
 

@@ -22,12 +22,20 @@ export default async function Image() {
           justifyContent: "center",
         }}
       >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="https://goats-heritage.vercel.app/images/logo.png"
+          alt="Goats Heritage"
+          height={150}
+          style={{ height: 150 }}
+        />
         <div
           style={{
-            fontSize: 64,
+            fontSize: 48,
             fontWeight: 700,
             color: "#C8A84E",
             letterSpacing: "0.05em",
+            marginTop: 24,
           }}
         >
           GOATS HERITAGE
@@ -36,7 +44,7 @@ export default async function Image() {
           style={{
             fontSize: 24,
             color: "#FFFFFF",
-            marginTop: 20,
+            marginTop: 16,
             letterSpacing: "0.02em",
           }}
         >

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { ShoppingBag, Menu, X, User, LogOut, LayoutDashboard } from "lucide-react";
 import { useCart } from "@/lib/cart-context";
@@ -86,8 +87,10 @@ export default function Navbar() {
       >
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           {/* Logo */}
-          <Link href="/" className="text-lg font-bold tracking-wider text-[#C8A84E]">
-            GOATS HERITAGE
+          <Link href="/" className="flex items-center gap-1.5">
+            <span className="text-lg font-bold tracking-wider text-[#C8A84E]">GOATS</span>
+            <Image src="/images/logo.png" width={36} height={36} alt="Goats Heritage" className="h-8 w-auto sm:h-9" />
+            <span className="text-lg font-bold tracking-wider text-[#C8A84E]">HERITAGE</span>
           </Link>
 
           {/* Center nav links - desktop */}
@@ -184,9 +187,11 @@ export default function Navbar() {
             <Link
               href="/"
               onClick={() => setMobileOpen(false)}
-              className="text-lg font-bold tracking-wider text-[#C8A84E]"
+              className="flex items-center gap-1.5"
             >
-              GOATS HERITAGE
+              <span className="text-lg font-bold tracking-wider text-[#C8A84E]">GOATS</span>
+              <Image src="/images/logo.png" width={36} height={36} alt="Goats Heritage" className="h-7 w-auto" />
+              <span className="text-lg font-bold tracking-wider text-[#C8A84E]">HERITAGE</span>
             </Link>
             <button
               onClick={() => setMobileOpen(false)}
