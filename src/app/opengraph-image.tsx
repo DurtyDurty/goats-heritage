@@ -8,7 +8,7 @@ export const size = {
 export const alt = "Goats Heritage - Premium Cigars & Lifestyle";
 export const contentType = "image/png";
 
-export default async function Image() {
+export default async function OgImage() {
   return new ImageResponse(
     (
       <div
@@ -22,20 +22,36 @@ export default async function Image() {
           justifyContent: "center",
         }}
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="https://goats-heritage.vercel.app/images/logo.png"
-          alt="Goats Heritage"
-          height={150}
-          style={{ height: 150 }}
-        />
         <div
           style={{
-            fontSize: 48,
+            display: "flex",
+            alignItems: "center",
+            gap: 16,
+          }}
+        >
+          <div
+            style={{
+              width: 80,
+              height: 80,
+              borderRadius: "50%",
+              border: "3px solid #C8A84E",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 40,
+              color: "#C8A84E",
+            }}
+          >
+            G
+          </div>
+        </div>
+        <div
+          style={{
+            fontSize: 64,
             fontWeight: 700,
             color: "#C8A84E",
-            letterSpacing: "0.05em",
-            marginTop: 24,
+            letterSpacing: "0.1em",
+            marginTop: 32,
           }}
         >
           GOATS HERITAGE
@@ -45,15 +61,22 @@ export default async function Image() {
             fontSize: 24,
             color: "#FFFFFF",
             marginTop: 16,
-            letterSpacing: "0.02em",
+            letterSpacing: "0.05em",
           }}
         >
           Premium Cigars & Lifestyle
         </div>
+        <div
+          style={{
+            width: 64,
+            height: 2,
+            background: "#C8A84E",
+            marginTop: 24,
+            opacity: 0.4,
+          }}
+        />
       </div>
     ),
-    {
-      ...size,
-    }
+    { ...size }
   );
 }
