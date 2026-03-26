@@ -13,8 +13,8 @@ export default function AgeGateModal() {
   }, []);
 
   function handleConfirm() {
-    const expires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toUTCString();
-    document.cookie = `goats_age_gate=verified; expires=${expires}; path=/`;
+    // Session cookie — expires when browser is closed
+    document.cookie = "goats_age_gate=verified; path=/";
     setVisible(false);
   }
 
