@@ -1,34 +1,33 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 
 const slides = [
-  "https://images.unsplash.com/photo-1478445214834-5e36de9923d7?w=1920&q=80",
+  "https://images.unsplash.com/photo-1527525443983-6e60c75fff46?w=1920&q=80",
   "https://images.unsplash.com/photo-1553433342-956cde1d7646?w=1920&q=80",
-  "https://images.unsplash.com/photo-1709526494925-a2780a094838?w=1920&q=80",
+  "https://images.unsplash.com/photo-1547424450-a69b33b2cdc2?w=1920&q=80",
   "https://images.unsplash.com/photo-1524335672824-627a98049dfa?w=1920&q=80",
 ];
 
 export default function HeroCarousel() {
   const [active, setActive] = useState(0);
-  const [paused, setPaused] = useState(false);
-
-  const advance = useCallback(() => {
-    setActive((prev) => (prev + 1) % slides.length);
-  }, []);
+  const paused = useRef(false);
 
   useEffect(() => {
-    if (paused) return;
-    const timer = setInterval(advance, 6000);
+    const timer = setInterval(() => {
+      if (!paused.current) {
+        setActive((prev) => (prev + 1) % slides.length);
+      }
+    }, 6000);
     return () => clearInterval(timer);
-  }, [paused, advance]);
+  }, []);
 
   return (
     <div
       className="absolute inset-0"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
+      onMouseEnter={() => { paused.current = true; }}
+      onMouseLeave={() => { paused.current = false; }}
     >
       {/* Slides */}
       {slides.map((src, i) => (
@@ -43,7 +42,8 @@ export default function HeroCarousel() {
             alt=""
             fill
             priority={i === 0}
-            className={`object-cover brightness-[0.15] ${
+            sizes="100vw"
+            className={`object-cover brightness-[0.3] ${
               i === active ? "animate-ken-burns" : ""
             }`}
           />
@@ -51,10 +51,10 @@ export default function HeroCarousel() {
       ))}
 
       {/* Gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/80" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/70" />
 
       {/* Gold radial */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(200,168,78,0.08)_0%,_transparent_70%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(200,168,78,0.06)_0%,_transparent_70%)]" />
 
       {/* Dot indicators */}
       <div className="absolute bottom-8 left-1/2 z-20 flex -translate-x-1/2 gap-2.5">
