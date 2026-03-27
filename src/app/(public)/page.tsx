@@ -158,7 +158,7 @@ export default async function HomePage() {
             <div className="mt-8 flex items-center justify-center gap-4">
               {/* Instagram */}
               <a
-                href="#"
+                href="https://www.instagram.com/goatsheritage"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex h-12 w-12 items-center justify-center rounded-full border border-[#262626] text-[#A3A3A3] transition-all hover:border-[#C8A84E] hover:text-[#C8A84E] hover:shadow-[0_0_15px_rgba(200,168,78,0.15)]"
