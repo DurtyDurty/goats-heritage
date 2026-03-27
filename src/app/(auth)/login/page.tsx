@@ -101,6 +101,9 @@ function LoginForm() {
         >
           {loading ? "Signing in..." : "Sign In"}
         </button>
+        <Link href="/forgot-password" className="mt-3 block text-center text-sm text-[#A3A3A3] transition-colors hover:text-[#C8A84E]">
+          Forgot password?
+        </Link>
       </form>
 
       <div className="my-6 flex items-center gap-4">
