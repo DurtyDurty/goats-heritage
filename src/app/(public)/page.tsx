@@ -34,6 +34,7 @@ export default async function HomePage() {
     .from("products")
     .select("*")
     .eq("is_active", true)
+    .eq("category", "cigar")
     .order("created_at", { ascending: false })
     .limit(4);
 
