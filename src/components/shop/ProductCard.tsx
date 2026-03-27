@@ -26,22 +26,45 @@ export default function ProductCard({ product }: { product: Product }) {
   return (
     <div className="group relative flex flex-col overflow-hidden rounded-xl border border-[#262626] bg-[#141414] transition-all duration-300 hover:border-[#C8A84E]">
       {/* Image */}
-      <Link href={href} className="relative aspect-square overflow-hidden bg-[#1A1A1A]">
+      <Link href={href} className="relative aspect-square overflow-hidden bg-[#0A0A0A]">
         {hasImage ? (
-          <Image
-            src={product.images[0]}
-            alt={product.name}
-            fill
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
-          />
+          <>
+            <Image
+              src={product.images[0]}
+              alt={product.name}
+              fill
+              className="object-cover blur-sm brightness-50 transition-all duration-300 group-hover:blur-[6px] group-hover:brightness-[0.4]"
+            />
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <Image
+                src="/images/logo.webp"
+                alt="Goats Heritage"
+                width={120}
+                height={60}
+                className="h-16 w-auto opacity-90"
+              />
+              <span className="mt-3 rounded-full bg-[#C8A84E]/10 px-4 py-1 text-xs font-bold uppercase tracking-widest text-[#C8A84E]">
+                Coming Soon
+              </span>
+            </div>
+          </>
         ) : (
-          <div className="flex h-full items-center justify-center text-[#262626] transition-transform duration-300 group-hover:scale-105">
-            <span className="text-4xl">&#9672;</span>
+          <div className="flex h-full flex-col items-center justify-center bg-[#0A0A0A]">
+            <Image
+              src="/images/logo.webp"
+              alt="Goats Heritage"
+              width={120}
+              height={60}
+              className="h-16 w-auto opacity-60"
+            />
+            <span className="mt-3 rounded-full bg-[#C8A84E]/10 px-4 py-1 text-xs font-bold uppercase tracking-widest text-[#C8A84E]">
+              Coming Soon
+            </span>
           </div>
         )}
 
         {product.is_member_exclusive && (
-          <span className="absolute left-3 top-3 rounded-md bg-[#C8A84E] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-black">
+          <span className="absolute left-3 top-3 z-10 rounded-md bg-[#C8A84E] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-black">
             Members Only
           </span>
         )}

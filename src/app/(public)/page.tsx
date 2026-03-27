@@ -42,13 +42,10 @@ export default function HomePage() {
 
         <div className="relative z-10 px-4 text-center">
           <div className="animate-fade-in">
-            <Image src="/images/logo.webp" alt="Goats Heritage" width={150} height={150} className="mx-auto h-36 w-auto" />
+            <Image src="/images/logo.webp" alt="Goats Heritage" width={400} height={200} className="mx-auto h-48 w-auto md:h-56" />
           </div>
-          <p className="mt-8 text-xs font-medium uppercase tracking-[0.3em] text-[#C8A84E]">
-            Premium Cigars &amp; Lifestyle
-          </p>
 
-          <h1 className="mt-6 text-5xl font-bold leading-tight md:text-7xl">
+          <h1 className="mt-8 text-5xl font-bold leading-tight md:text-7xl">
             <span className="text-[#C8A84E]">Heritage</span> in Every Draw
           </h1>
 

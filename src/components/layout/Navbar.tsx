@@ -87,10 +87,8 @@ export default function Navbar() {
       >
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-1.5">
-            <span className="text-lg font-bold tracking-wider text-[#C8A84E]">GOATS</span>
-            <Image src="/images/logo.webp" width={36} height={36} alt="Goats Heritage" className="h-8 w-auto sm:h-9" />
-            <span className="text-lg font-bold tracking-wider text-[#C8A84E]">HERITAGE</span>
+          <Link href="/">
+            <Image src="/images/logo.webp" width={120} height={48} alt="Goats Heritage" className="h-10 w-auto sm:h-12" />
           </Link>
 
           {/* Center nav links - desktop */}
@@ -187,11 +185,8 @@ export default function Navbar() {
             <Link
               href="/"
               onClick={() => setMobileOpen(false)}
-              className="flex items-center gap-1.5"
             >
-              <span className="text-lg font-bold tracking-wider text-[#C8A84E]">GOATS</span>
-              <Image src="/images/logo.webp" width={36} height={36} alt="Goats Heritage" className="h-7 w-auto" />
-              <span className="text-lg font-bold tracking-wider text-[#C8A84E]">HERITAGE</span>
+              <Image src="/images/logo.webp" width={100} height={40} alt="Goats Heritage" className="h-9 w-auto" />
             </Link>
             <button
               onClick={() => setMobileOpen(false)}
