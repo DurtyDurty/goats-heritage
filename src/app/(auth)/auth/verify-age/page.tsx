@@ -63,6 +63,23 @@ export default function VerifyAgePage() {
       return;
     }
 
+    // Check if DOB was already set (24hr edit lock)
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("date_of_birth, updated_at")
+      .eq("id", user.id)
+      .single();
+
+    if (profile?.date_of_birth) {
+      const updatedAt = new Date(profile.updated_at);
+      const hoursSince = (Date.now() - updatedAt.getTime()) / (1000 * 60 * 60);
+      if (hoursSince > 24) {
+        setError("Date of birth can only be changed within 24 hours of setting it. Contact support for assistance.");
+        setLoading(false);
+        return;
+      }
+    }
+
     const { error: updateError } = await supabase
       .from("profiles")
       .update({
@@ -83,8 +100,7 @@ export default function VerifyAgePage() {
       return;
     }
 
-    router.push("/account");
-    router.refresh();
+    window.location.href = "/";
   }
 
   const selectClasses =
@@ -113,8 +129,7 @@ export default function VerifyAgePage() {
             </p>
             <button
               onClick={() => {
-                router.push("/account");
-                router.refresh();
+                window.location.href = "/";
               }}
               className="mt-4 rounded-lg border border-[#C8A84E] px-6 py-2 text-sm font-medium text-[#C8A84E] transition-colors hover:bg-[#C8A84E]/10"
             >
