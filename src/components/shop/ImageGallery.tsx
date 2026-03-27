@@ -21,7 +21,7 @@ export default function ImageGallery({ images }: { images: string[] }) {
             />
             <div className="absolute inset-0 flex flex-col items-center justify-center">
               <Image
-                src="/images/logo.webp"
+                src="/images/logo.png"
                 alt="Goats Heritage"
                 width={200}
                 height={100}
@@ -35,7 +35,7 @@ export default function ImageGallery({ images }: { images: string[] }) {
         ) : (
           <div className="flex h-full flex-col items-center justify-center">
             <Image
-              src="/images/logo.webp"
+              src="/images/logo.png"
               alt="Goats Heritage"
               width={200}
               height={100}

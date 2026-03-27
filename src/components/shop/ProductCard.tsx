@@ -37,7 +37,7 @@ export default function ProductCard({ product }: { product: Product }) {
             />
             <div className="absolute inset-0 flex flex-col items-center justify-center">
               <Image
-                src="/images/logo.webp"
+                src="/images/logo.png"
                 alt="Goats Heritage"
                 width={120}
                 height={60}
@@ -51,7 +51,7 @@ export default function ProductCard({ product }: { product: Product }) {
         ) : (
           <div className="flex h-full flex-col items-center justify-center bg-[#0A0A0A]">
             <Image
-              src="/images/logo.webp"
+              src="/images/logo.png"
               alt="Goats Heritage"
               width={120}
               height={60}
