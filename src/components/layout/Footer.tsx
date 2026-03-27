@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import NewsletterSignup from "./NewsletterSignup";
 
 const quickLinks = [
   { href: "/shop", label: "Shop" },
@@ -71,22 +72,9 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Connect */}
+          {/* Newsletter */}
           <div>
-            <h4 className="text-sm font-semibold uppercase tracking-wider text-[#F5F5F5]">
-              Connect
-            </h4>
-            <div className="mt-3 flex gap-4">
-              {["Instagram", "Twitter", "Facebook"].map((platform) => (
-                <span
-                  key={platform}
-                  className="flex h-9 w-9 items-center justify-center rounded-full border border-[#262626] text-xs text-[#A3A3A3] transition-colors hover:border-[#C8A84E] hover:text-[#C8A84E]"
-                  title={platform}
-                >
-                  {platform[0]}
-                </span>
-              ))}
-            </div>
+            <NewsletterSignup />
           </div>
         </div>
 

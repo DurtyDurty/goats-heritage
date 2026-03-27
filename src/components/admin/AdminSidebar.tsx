@@ -10,6 +10,7 @@ import {
   Users,
   Calendar,
   ExternalLink,
+  Mail,
 } from "lucide-react";
 
 const navItems = [
@@ -18,6 +19,7 @@ const navItems = [
   { href: "/admin/orders", label: "Orders", icon: ShoppingBag },
   { href: "/admin/members", label: "Members", icon: Users },
   { href: "/admin/events", label: "Events", icon: Calendar },
+  { href: "/admin/newsletter", label: "Newsletter", icon: Mail },
 ];
 
 export default function AdminSidebar() {
