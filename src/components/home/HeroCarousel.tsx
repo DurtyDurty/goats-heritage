@@ -7,7 +7,7 @@ const slides = [
   "https://images.unsplash.com/photo-1592862080230-fe0a3b380f21?w=1920&q=80",
   "https://images.unsplash.com/photo-1634922951968-11ca107aa6e3?w=1920&q=80",
   "https://images.unsplash.com/photo-1553433342-956cde1d7646?w=1920&q=80",
-  "https://images.unsplash.com/photo-1547652577-b4fe2f34d7ee?w=1920&q=80",
+  "https://images.unsplash.com/photo-1478445214834-5e36de9923d7?w=1920&q=80",
 ];
 
 export default function HeroCarousel() {
