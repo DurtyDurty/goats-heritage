@@ -4,9 +4,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { type Product, formatPrice } from "@/lib/types";
 import { useCart } from "@/lib/cart-context";
+import { useToast } from "@/components/ui/Toast";
 
 export default function ProductCard({ product }: { product: Product }) {
   const { addToCart } = useCart();
+  const { showToast } = useToast();
   const href = `/shop/${product.category}/${product.slug}`;
   const hasImage = product.images.length > 0;
   const soldOut = product.inventory_count === 0;
@@ -21,6 +23,7 @@ export default function ProductCard({ product }: { product: Product }) {
       image: hasImage ? product.images[0] : null,
       is_member_exclusive: product.is_member_exclusive,
     });
+    showToast(`${product.name} added to cart`);
   }
 
   return (

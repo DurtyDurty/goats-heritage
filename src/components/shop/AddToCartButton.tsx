@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Minus, Plus } from "lucide-react";
 import { useCart, type CartItem } from "@/lib/cart-context";
+import { useToast } from "@/components/ui/Toast";
 
 interface Props {
   item: Omit<CartItem, "quantity">;
@@ -12,10 +13,12 @@ interface Props {
 
 export default function AddToCartButton({ item, maxQty, soldOut }: Props) {
   const { addToCart } = useCart();
+  const { showToast } = useToast();
   const [qty, setQty] = useState(1);
 
   function handleAdd() {
     addToCart(item, qty);
+    showToast(`${item.name} added to cart`);
     setQty(1);
   }
 

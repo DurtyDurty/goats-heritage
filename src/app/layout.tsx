@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { CartProvider } from "@/lib/cart-context";
+import { ToastProvider } from "@/components/ui/Toast";
 import PublicShell from "@/components/layout/PublicShell";
 import "./globals.css";
 
@@ -25,7 +26,9 @@ export default function RootLayout({
     <html lang="en" className="dark">
       <body className={`${inter.className} bg-[#0A0A0A] text-[#F5F5F5]`}>
         <CartProvider>
-          <PublicShell>{children}</PublicShell>
+          <ToastProvider>
+            <PublicShell>{children}</PublicShell>
+          </ToastProvider>
         </CartProvider>
       </body>
     </html>
