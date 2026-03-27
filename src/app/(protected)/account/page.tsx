@@ -38,12 +38,6 @@ export default async function AccountPage() {
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-[#A3A3A3]">Role</span>
-              <span className="capitalize text-[#C8A84E]">
-                {profile?.role || "customer"}
-              </span>
-            </div>
-            <div className="flex justify-between">
               <span className="text-[#A3A3A3]">Age Verified</span>
               <span className={profile?.age_verified ? "text-[#22C55E]" : "text-[#F59E0B]"}>
                 {profile?.age_verified ? "Yes" : "No"}
