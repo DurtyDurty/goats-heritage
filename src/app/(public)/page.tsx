@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import ProductCard from "@/components/shop/ProductCard";
+import HeroCarousel from "@/components/home/HeroCarousel";
 import { MapPin } from "lucide-react";
 import { type Product } from "@/lib/types";
 
@@ -37,18 +38,8 @@ export default function HomePage() {
     <>
       {/* ── Hero ── */}
       <section className="relative flex min-h-screen items-center justify-center overflow-hidden">
-        {/* Background image */}
-        <Image
-          src="https://images.unsplash.com/photo-1530973428-5bf2db2e4d71?w=1920&q=80"
-          alt=""
-          fill
-          className="object-cover brightness-[0.15]"
-          priority
-        />
-        {/* Gradient overlay */}
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#0A0A0A]/60 via-transparent to-[#0A0A0A]" />
-        {/* Gold radial */}
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(200,168,78,0.08)_0%,_transparent_70%)]" />
+        {/* Background carousel */}
+        <HeroCarousel />
 
         <div className="relative z-10 px-4 text-center">
           <div className="animate-fade-in">
