@@ -26,7 +26,13 @@ export async function GET() {
   const unread = messages.filter((m: any) => m.status === "unread").length;
   const replied = messages.filter((m: any) => m.status === "replied").length;
 
-  return NextResponse.json({ messages, total, unread, replied });
+  // Fetch sent emails
+  const { data: sentData } = await supabase
+    .from("sent_emails")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  return NextResponse.json({ messages, total, unread, replied, sent: sentData || [] });
 }
 
 export async function PATCH(req: Request) {

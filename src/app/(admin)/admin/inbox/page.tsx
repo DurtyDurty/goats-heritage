@@ -14,11 +14,20 @@ interface ContactMessage {
   created_at: string;
 }
 
+interface SentEmail {
+  id: string;
+  to_email: string;
+  subject: string;
+  message: string;
+  created_at: string;
+}
+
 export default function AdminInboxPage() {
   const [messages, setMessages] = useState<ContactMessage[]>([]);
+  const [sent, setSent] = useState<SentEmail[]>([]);
   const [counts, setCounts] = useState({ total: 0, unread: 0, replied: 0 });
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"messages" | "compose">("messages");
+  const [activeTab, setActiveTab] = useState<"messages" | "sent" | "compose">("messages");
   const [selected, setSelected] = useState<ContactMessage | null>(null);
   const [replyText, setReplyText] = useState("");
   const [replying, setReplying] = useState(false);
@@ -38,6 +47,7 @@ export default function AdminInboxPage() {
       const data = await res.json();
       if (res.ok) {
         setMessages(data.messages);
+        setSent(data.sent || []);
         setCounts({ total: data.total, unread: data.unread, replied: data.replied });
       }
     } catch {
@@ -181,6 +191,16 @@ export default function AdminInboxPage() {
           }`}
         >
           Messages
+        </button>
+        <button
+          onClick={() => setActiveTab("sent")}
+          className={`flex-1 rounded-md px-4 py-2 text-sm font-medium transition-colors ${
+            activeTab === "sent"
+              ? "bg-[#141414] text-[#C8A84E]"
+              : "text-[#A3A3A3] hover:text-white"
+          }`}
+        >
+          Sent ({sent.length})
         </button>
         <button
           onClick={() => setActiveTab("compose")}
@@ -375,6 +395,37 @@ export default function AdminInboxPage() {
             </div>
           )}
         </>
+      )}
+
+      {/* Sent Tab */}
+      {activeTab === "sent" && (
+        <div className="rounded-xl border border-[#262626] bg-[#141414]">
+          {sent.length === 0 ? (
+            <p className="py-12 text-center text-[#A3A3A3]">No sent emails yet</p>
+          ) : (
+            <div className="divide-y divide-[#262626]">
+              {sent.map((s) => (
+                <div key={s.id} className="px-6 py-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-[#F5F5F5]">{s.subject}</p>
+                      <p className="mt-0.5 text-xs text-[#A3A3A3]">To: {s.to_email}</p>
+                    </div>
+                    <p className="text-xs text-[#A3A3A3]">
+                      {new Date(s.created_at).toLocaleString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        hour: "numeric",
+                        minute: "2-digit",
+                      })}
+                    </p>
+                  </div>
+                  <p className="mt-2 text-sm text-[#A3A3A3] line-clamp-2">{s.message}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       )}
 
       {/* Compose Tab */}
