@@ -20,25 +20,35 @@ function LoginForm() {
     setError("");
     setLoading(true);
 
-    const supabase = createClient();
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    if (error) {
-      setError(error.message);
+      if (error) {
+        if (error.message.includes("Email not confirmed")) {
+          setError("Please verify your email before signing in. Check your inbox.");
+        } else {
+          setError(error.message);
+        }
+        setLoading(false);
+        return;
+      }
+
+      if (!data.session) {
+        setError("Please verify your email before signing in. Check your inbox.");
+        setLoading(false);
+        return;
+      }
+
+      // Force full page navigation
+      window.location.href = redirectTo;
+    } catch (err: any) {
+      setError(err.message || "Something went wrong");
       setLoading(false);
-      return;
     }
-
-    if (!data.session) {
-      setError("Email not verified. Please check your inbox and verify your email first.");
-      setLoading(false);
-      return;
-    }
-
-    window.location.replace(redirectTo);
   }
 
   async function handleGoogleLogin() {
