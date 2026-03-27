@@ -23,6 +23,7 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [user, setUser] = useState<SupabaseUser | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const { getCartCount, setDrawerOpen, isLoaded } = useCart();
   const cartItemCount = isLoaded ? getCartCount() : 0;
   const userMenuRef = useRef<HTMLDivElement>(null);
@@ -47,12 +48,23 @@ export default function Navbar() {
   // Auth state
   useEffect(() => {
     const supabase = createClient();
-    supabase.auth.getUser().then(({ data: { user } }) => setUser(user));
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      setUser(user);
+      if (user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", user.id)
+          .single();
+        setIsAdmin(profile?.role === "admin");
+      }
+    });
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
+      if (!session?.user) setIsAdmin(false);
     });
 
     return () => subscription.unsubscribe();
@@ -150,6 +162,16 @@ export default function Navbar() {
                       <LayoutDashboard className="h-4 w-4" />
                       Account
                     </Link>
+                    {isAdmin && (
+                      <Link
+                        href="/admin"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-2 px-4 py-2.5 text-sm text-[#C8A84E] transition-colors hover:bg-[#1A1A1A]"
+                      >
+                        <LayoutDashboard className="h-4 w-4" />
+                        Admin Panel
+                      </Link>
+                    )}
                     <button
                       onClick={handleSignOut}
                       className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-[#A3A3A3] transition-colors hover:bg-[#1A1A1A] hover:text-[#EF4444]"
