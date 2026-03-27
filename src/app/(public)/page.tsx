@@ -35,8 +35,9 @@ export default async function HomePage() {
     .select("*")
     .eq("is_active", true)
     .eq("category", "cigar")
+    .in("slug", ["baby-goats", "florentino"])
     .order("created_at", { ascending: false })
-    .limit(4);
+    .limit(2);
 
   return (
     <>
