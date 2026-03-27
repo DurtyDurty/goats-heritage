@@ -11,7 +11,6 @@ export interface Product {
   is_active: boolean;
   is_member_exclusive: boolean;
   metadata: Record<string, string>;
-  stripe_price_id: string | null;
   created_at: string;
   updated_at: string;
 }
