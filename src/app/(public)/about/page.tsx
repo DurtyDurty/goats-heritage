@@ -10,7 +10,15 @@ export default function AboutPage() {
   return (
     <>
       {/* Hero */}
-      <section className="relative flex items-center justify-center overflow-hidden bg-gradient-to-b from-[#0A0A0A] via-[#141414] to-[#0A0A0A] py-32">
+      <section className="relative flex items-center justify-center overflow-hidden py-32">
+        <Image
+          src="https://images.unsplash.com/photo-1633526544668-c4f2e3c8d999?w=1920&q=80"
+          alt=""
+          fill
+          className="object-cover brightness-[0.15]"
+          priority
+        />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#0A0A0A]/60 via-transparent to-[#0A0A0A]" />
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(200,168,78,0.06)_0%,_transparent_70%)]" />
         <div className="relative z-10 px-4 text-center">
           <Image src="/images/logo.png" alt="Goats Heritage" width={200} height={100} className="mx-auto h-32 w-auto" />
@@ -46,7 +54,14 @@ export default function AboutPage() {
       <section className="bg-[#141414] py-24">
         <div className="mx-auto grid max-w-7xl gap-12 px-4 sm:px-6 lg:grid-cols-2 lg:items-center lg:px-8">
           <div className="flex items-center justify-center">
-            <div className="aspect-[3/4] w-full max-w-sm rounded-xl border border-[#C8A84E]/20 bg-[#1A1A1A]" />
+            <div className="relative aspect-[3/4] w-full max-w-sm overflow-hidden rounded-xl border border-[#C8A84E]/20">
+              <Image
+                src="https://images.unsplash.com/photo-1633526543814-9718c8922b7a?w=800&q=80"
+                alt="Tobacco heritage"
+                fill
+                className="object-cover brightness-75"
+              />
+            </div>
           </div>
           <div>
             <p className="text-xs font-medium uppercase tracking-[0.3em] text-[#C8A84E]">

@@ -18,7 +18,10 @@
       "WebFetch(domain:www.educative.io)",
       "WebFetch(domain:github.com)",
       "WebFetch(domain:raw.githubusercontent.com)",
-      "WebFetch(domain:splashfinder.app)"
+      "WebFetch(domain:splashfinder.app)",
+      "Bash(curl -s https://unsplash.com/s/photos/cigar-smoke-dark)",
+      "Bash(curl -sI https://unsplash.com/photos/TnDaYFLMoSY/download)",
+      "Bash(curl -sI https://source.unsplash.com/TnDaYFLMoSY/1920x1080)"
     ]
   }
 }

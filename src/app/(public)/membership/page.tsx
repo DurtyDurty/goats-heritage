@@ -70,7 +70,13 @@ export default function MembershipPage() {
   return (
     <>
       {/* Hero */}
-      <section className="relative flex items-center justify-center overflow-hidden bg-gradient-to-b from-[#0A0A0A] via-[#141414] to-[#0A0A0A] py-32">
+      <section className="relative flex items-center justify-center overflow-hidden py-32">
+        <img
+          src="https://images.unsplash.com/photo-1669554017468-2399ffe08222?w=1920&q=80"
+          alt=""
+          className="pointer-events-none absolute inset-0 h-full w-full object-cover brightness-[0.15]"
+        />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#0A0A0A]/60 via-transparent to-[#0A0A0A]" />
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(200,168,78,0.06)_0%,_transparent_70%)]" />
         <div className="relative z-10 px-4 text-center">
           <p className="text-xs font-medium uppercase tracking-[0.3em] text-[#C8A84E]">

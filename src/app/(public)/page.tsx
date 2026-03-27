@@ -36,8 +36,18 @@ export default function HomePage() {
   return (
     <>
       {/* ── Hero ── */}
-      <section className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-b from-[#0A0A0A] via-[#141414] to-[#0A0A0A]">
-        {/* Radial gold overlay */}
+      <section className="relative flex min-h-screen items-center justify-center overflow-hidden">
+        {/* Background image */}
+        <Image
+          src="https://images.unsplash.com/photo-1530973428-5bf2db2e4d71?w=1920&q=80"
+          alt=""
+          fill
+          className="object-cover brightness-[0.15]"
+          priority
+        />
+        {/* Gradient overlay */}
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#0A0A0A]/60 via-transparent to-[#0A0A0A]" />
+        {/* Gold radial */}
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(200,168,78,0.08)_0%,_transparent_70%)]" />
 
         <div className="relative z-10 px-4 text-center">
