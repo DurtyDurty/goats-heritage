@@ -2,7 +2,23 @@
   "permissions": {
     "allow": [
       "Bash(dir)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(curl -s https://unsplash.com/s/photos/cigar-close-up)",
+      "WebSearch",
+      "Bash(curl -sI https://unsplash.com/photos/close-view-of-anejados-cigars-zE3K2VWyNRk)",
+      "Bash(curl -s https://unsplash.com/photos/close-view-of-anejados-cigars-zE3K2VWyNRk)",
+      "Bash(curl -sL https://unsplash.com/photos/close-view-of-anejados-cigars-zE3K2VWyNRk)",
+      "WebFetch(domain:unsplash.com)",
+      "WebFetch(domain:images.unsplash.com)",
+      "WebFetch(domain:source.unsplash.com)",
+      "WebFetch(domain:dev.to)",
+      "WebFetch(domain:en.fmyly.com)",
+      "WebFetch(domain:allegra9.medium.com)",
+      "Bash(curl -sL -H \"User-Agent: Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 \\(KHTML, like Gecko\\) Chrome/120.0.0.0 Safari/537.36\" https://unsplash.com/photos/zE3K2VWyNRk)",
+      "WebFetch(domain:www.educative.io)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:splashfinder.app)"
     ]
   }
 }
