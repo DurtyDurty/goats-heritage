@@ -93,7 +93,7 @@ export default function Footer() {
             You must be 21 years or older to purchase tobacco products.
           </p>
           <p className="mt-4 text-center text-xs tracking-wider text-[#A3A3A3]/80">
-            Proud Veteran-Owned Business
+            🇺🇸 Proud Veteran-Owned Business
           </p>
         </div>
       </div>
