@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import ProductCard from "@/components/shop/ProductCard";
 import HeroCarousel from "@/components/home/HeroCarousel";
+import FadeIn from "@/components/ui/FadeIn";
 import { type Product } from "@/lib/types";
 import { createClient } from "@/lib/supabase/server";
 
@@ -59,30 +60,36 @@ export default async function HomePage() {
       {/* ── Featured Collection ── */}
       <section className="py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h2 className="text-3xl font-bold md:text-4xl">
-              The <span className="text-[#C8A84E]">Collection</span>
-            </h2>
-            <div className="mx-auto mt-3 h-px w-16 bg-[#C8A84E]/40" />
-            <p className="mt-4 text-[#A3A3A3]">
-              Hand-selected premium cigars for every occasion.
-            </p>
-          </div>
+          <FadeIn>
+            <div className="text-center">
+              <h2 className="text-3xl font-bold md:text-4xl">
+                The <span className="text-[#C8A84E]">Collection</span>
+              </h2>
+              <div className="mx-auto mt-3 h-px w-16 bg-[#C8A84E]/40" />
+              <p className="mt-4 text-[#A3A3A3]">
+                Hand-selected premium cigars for every occasion.
+              </p>
+            </div>
+          </FadeIn>
 
           <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {((featuredProducts as Product[]) || []).map((product) => (
-              <ProductCard key={product.id} product={product} />
+            {((featuredProducts as Product[]) || []).map((product, i) => (
+              <FadeIn key={product.id} delay={i * 100}>
+                <ProductCard product={product} />
+              </FadeIn>
             ))}
           </div>
 
-          <div className="mt-10 text-center">
-            <Link
-              href="/shop"
-              className="inline-block rounded-lg border border-[#C8A84E] px-8 py-3 text-sm font-medium text-[#C8A84E] transition-colors hover:bg-[#C8A84E]/10"
-            >
-              View All Products
-            </Link>
-          </div>
+          <FadeIn delay={300}>
+            <div className="mt-10 text-center">
+              <Link
+                href="/shop"
+                className="inline-block rounded-lg border border-[#C8A84E] px-8 py-3 text-sm font-medium text-[#C8A84E] transition-colors hover:bg-[#C8A84E]/10"
+              >
+                View All Products
+              </Link>
+            </div>
+          </FadeIn>
         </div>
       </section>
 
@@ -90,6 +97,7 @@ export default async function HomePage() {
       <section className="bg-[#141414] py-24">
         <div className="mx-auto grid max-w-7xl gap-12 px-4 sm:px-6 lg:grid-cols-2 lg:items-center lg:px-8">
           {/* Left — text */}
+          <FadeIn>
           <div>
             <p className="text-xs font-medium uppercase tracking-[0.3em] text-[#C8A84E]">
               The Inner Circle
@@ -128,8 +136,10 @@ export default async function HomePage() {
               Learn More
             </Link>
           </div>
+          </FadeIn>
 
           {/* Right — lifestyle image */}
+          <FadeIn delay={200}>
           <div className="flex items-center justify-center">
             <div className="relative aspect-[4/5] w-full max-w-sm overflow-hidden rounded-xl border border-[#C8A84E]/20">
               <Image
@@ -140,12 +150,14 @@ export default async function HomePage() {
               />
             </div>
           </div>
+          </FadeIn>
         </div>
       </section>
 
       {/* ── Upcoming Events ── */}
       <section className="py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <FadeIn>
           <div className="text-center">
             <h2 className="text-3xl font-bold md:text-4xl">
               The <span className="text-[#C8A84E]">Experience</span>
@@ -169,6 +181,7 @@ export default async function HomePage() {
 
             </div>
           </div>
+          </FadeIn>
         </div>
       </section>
     </>
