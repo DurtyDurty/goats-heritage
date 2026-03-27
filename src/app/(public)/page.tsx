@@ -2,30 +2,9 @@ import Link from "next/link";
 import Image from "next/image";
 import ProductCard from "@/components/shop/ProductCard";
 import HeroCarousel from "@/components/home/HeroCarousel";
-import { MapPin } from "lucide-react";
 import { type Product } from "@/lib/types";
 import { createClient } from "@/lib/supabase/server";
 
-const upcomingEvents = [
-  {
-    date: "APR 12",
-    title: "Spring Smoke & Social",
-    location: "Houston, TX",
-    description: "An evening of premium cigars, craft cocktails, and good company.",
-  },
-  {
-    date: "APR 26",
-    title: "Members-Only Tasting",
-    location: "Dallas, TX",
-    description: "Exclusive tasting of our newest limited-edition blends.",
-  },
-  {
-    date: "MAY 10",
-    title: "Heritage Gala Night",
-    location: "Miami, FL",
-    description: "Our annual celebration of culture, craft, and community.",
-  },
-];
 
 export default async function HomePage() {
   const supabase = createClient();
@@ -168,32 +147,6 @@ export default async function HomePage() {
             <p className="mt-4 text-[#A3A3A3]">
               Tune in on our social media for upcoming events.
             </p>
-          </div>
-
-          <div className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-3">
-            {upcomingEvents.map((event) => (
-              <div
-                key={event.title}
-                className="rounded-xl border border-[#262626] bg-[#141414] p-6 transition-colors hover:border-[#C8A84E]/30"
-              >
-                <span className="inline-block rounded-md bg-[#C8A84E]/10 px-3 py-1 text-xs font-bold tracking-wider text-[#C8A84E]">
-                  {event.date}
-                </span>
-                <h3 className="mt-4 text-lg font-semibold text-[#F5F5F5]">
-                  {event.title}
-                </h3>
-                <div className="mt-2 flex items-center gap-1.5 text-sm text-[#A3A3A3]">
-                  <MapPin className="h-3.5 w-3.5" />
-                  {event.location}
-                </div>
-                <p className="mt-3 text-sm leading-relaxed text-[#A3A3A3]">
-                  {event.description}
-                </p>
-                <button className="mt-5 w-full rounded-lg border border-[#C8A84E] py-2 text-sm font-medium text-[#C8A84E] transition-colors hover:bg-[#C8A84E]/10">
-                  RSVP
-                </button>
-              </div>
-            ))}
           </div>
         </div>
       </section>
