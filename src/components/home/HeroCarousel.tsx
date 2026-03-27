@@ -43,7 +43,7 @@ export default function HeroCarousel() {
             fill
             priority={i === 0}
             sizes="100vw"
-            className={`object-cover brightness-[0.3] ${
+            className={`object-cover brightness-[0.4] ${
               i === active ? "animate-ken-burns" : ""
             }`}
           />
@@ -51,7 +51,7 @@ export default function HeroCarousel() {
       ))}
 
       {/* Gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/70" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/60" />
 
       {/* Gold radial */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(200,168,78,0.06)_0%,_transparent_70%)]" />
