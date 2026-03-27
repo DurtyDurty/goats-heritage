@@ -38,11 +38,7 @@ function LoginForm() {
       return;
     }
 
-    setError("Login successful! Redirecting...");
-
-    setTimeout(() => {
-      window.location.href = "/account";
-    }, 500);
+    window.location.href = "/account";
   }
 
   async function handleGoogleLogin() {
