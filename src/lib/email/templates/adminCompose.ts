@@ -15,7 +15,7 @@ export function adminCompose({
 <head><meta charset="utf-8" /></head>
 <body style="margin:0;padding:20px;font-family:Arial,sans-serif;background:#ffffff;">
   <div style="max-width:600px;margin:0 auto;">
-    <img src="https://www.goatsheritage.com/images/logo.png" alt="Goats Heritage" style="display:block;margin:0 auto 20px;height:60px;width:auto;" />
+    <div style="display:block;margin:0 auto 20px;width:80px;height:80px;border-radius:50%;background:#0A0A0A;padding:10px;text-align:center;"><img src="https://www.goatsheritage.com/images/logo.png" alt="Goats Heritage" style="height:60px;width:auto;display:inline-block;" /></div>
     <div style="font-size:14px;line-height:1.7;color:#333333;white-space:pre-wrap;">${message}</div>
     <div style="margin-top:32px;padding-top:16px;border-top:1px solid #e5e5e5;">
       <p style="margin:0;font-size:12px;color:#999;">

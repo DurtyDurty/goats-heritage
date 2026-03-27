@@ -52,7 +52,7 @@ export function orderConfirmation({
           <!-- Logo -->
           <tr>
             <td style="padding:0 0 20px;text-align:center;">
-              <img src="https://www.goatsheritage.com/images/logo.png" alt="Goats Heritage" style="display:block;margin:0 auto 20px;height:60px;width:auto;" />
+              <div style="display:block;margin:0 auto 20px;width:80px;height:80px;border-radius:50%;background:#0A0A0A;padding:10px;text-align:center;"><img src="https://www.goatsheritage.com/images/logo.png" alt="Goats Heritage" style="height:60px;width:auto;display:inline-block;" /></div>
             </td>
           </tr>
           <!-- Body -->
