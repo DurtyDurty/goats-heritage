@@ -17,7 +17,7 @@ export default async function SubscriptionPage({ searchParams }: Props) {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("role, stripe_customer_id")
+    .select("role")
     .eq("id", user.id)
     .single();
 
@@ -30,7 +30,6 @@ export default async function SubscriptionPage({ searchParams }: Props) {
     .single();
 
   const isActive = subscription?.status === "active";
-  const hasStripeCustomer = !!profile?.stripe_customer_id;
 
   return (
     <section className="py-12">
@@ -113,7 +112,7 @@ export default async function SubscriptionPage({ searchParams }: Props) {
               </div>
             </div>
 
-            {hasStripeCustomer && <SubscriptionActions />}
+            {isActive && <SubscriptionActions />}
           </div>
         ) : (
           <div className="mt-8 rounded-xl border border-[#262626] bg-[#141414] p-8 text-center">

@@ -1,5 +1,11 @@
 "use client";
 
+declare global {
+  interface Window {
+    Accept: any;
+  }
+}
+
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Check } from "lucide-react";
@@ -11,6 +17,22 @@ export default function JoinPage() {
   const [subscribing, setSubscribing] = useState(false);
   const [error, setError] = useState("");
   const [authenticated, setAuthenticated] = useState(false);
+  const [ageConfirmed, setAgeConfirmed] = useState(false);
+
+  // Shipping fields
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [address, setAddress] = useState("");
+  const [city, setCity] = useState("");
+  const [state, setState] = useState("");
+  const [zip, setZip] = useState("");
+  const [phone, setPhone] = useState("");
+
+  // Card fields
+  const [cardNumber, setCardNumber] = useState("");
+  const [expMonth, setExpMonth] = useState("");
+  const [expYear, setExpYear] = useState("");
+  const [cvv, setCvv] = useState("");
 
   useEffect(() => {
     const supabase = createClient();
@@ -38,25 +60,87 @@ export default function JoinPage() {
     });
   }, [router]);
 
-  async function handleSubscribe() {
+  // Load Accept.js
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (document.getElementById("accept-js-script")) return;
+    const script = document.createElement("script");
+    script.id = "accept-js-script";
+    script.src = "https://jstest.authorize.net/v1/Accept.js";
+    script.charset = "utf-8";
+    document.head.appendChild(script);
+  }, []);
+
+  async function handleSubscribe(e: React.FormEvent) {
+    e.preventDefault();
     setError("");
+
+    if (!ageConfirmed) {
+      setError(
+        "You must confirm you are 21 or older to subscribe to tobacco products."
+      );
+      return;
+    }
+
     setSubscribing(true);
 
-    try {
-      const res = await fetch("/api/stripe/subscription", {
-        method: "POST",
-      });
-      const data = await res.json();
+    // Tokenize card via Accept.js
+    const authData = {
+      clientKey: process.env.NEXT_PUBLIC_AUTHNET_CLIENT_KEY!,
+      apiLoginID: process.env.NEXT_PUBLIC_AUTHNET_API_LOGIN_ID!,
+    };
 
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to create subscription");
+    const cardData = {
+      cardNumber,
+      month: expMonth,
+      year: expYear,
+      cardCode: cvv,
+    };
+
+    window.Accept.dispatchData(
+      { authData, cardData },
+      async (response: any) => {
+        if (response.messages.resultCode === "Error") {
+          setError(
+            response.messages.message.map((m: any) => m.text).join(". ")
+          );
+          setSubscribing(false);
+          return;
+        }
+
+        const opaqueData = response.opaqueData;
+
+        try {
+          const res = await fetch("/api/membership/subscribe", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              opaqueData,
+              shippingAddress: {
+                firstName,
+                lastName,
+                address,
+                city,
+                state,
+                zip,
+                phone,
+              },
+            }),
+          });
+
+          const data = await res.json();
+
+          if (!res.ok) {
+            throw new Error(data.error || "Failed to create subscription");
+          }
+
+          router.push("/account/subscription?success=true");
+        } catch (err: any) {
+          setError(err.message);
+          setSubscribing(false);
+        }
       }
-
-      window.location.href = data.url;
-    } catch (err: any) {
-      setError(err.message);
-      setSubscribing(false);
-    }
+    );
   }
 
   if (loading || !authenticated) {
@@ -69,7 +153,7 @@ export default function JoinPage() {
 
   return (
     <div className="flex min-h-[70vh] items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md rounded-2xl border-2 border-[#C8A84E] bg-[#141414] p-8">
+      <div className="w-full max-w-lg rounded-2xl border-2 border-[#C8A84E] bg-[#141414] p-8">
         <div className="text-center">
           <h2 className="text-lg font-bold tracking-wider text-[#C8A84E]">
             GOATS HERITAGE
@@ -88,7 +172,7 @@ export default function JoinPage() {
           </div>
           <ul className="mt-4 space-y-2">
             {[
-              "5–7 premium cigars monthly",
+              "5-7 premium cigars monthly",
               "Members-only merch access",
               "10% off all purchases",
               "VIP event invites",
@@ -105,21 +189,148 @@ export default function JoinPage() {
           </ul>
         </div>
 
-        {error && (
-          <p className="mt-4 text-sm text-[#EF4444]">{error}</p>
-        )}
+        <form onSubmit={handleSubscribe} className="mt-6 space-y-6">
+          {/* Shipping */}
+          <div>
+            <h3 className="text-sm font-semibold text-[#F5F5F5]">
+              Shipping Address
+            </h3>
+            <div className="mt-3 grid grid-cols-2 gap-3">
+              <input
+                type="text"
+                placeholder="First Name"
+                required
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                className="rounded-lg border border-[#262626] bg-[#0A0A0A] px-3 py-2.5 text-sm text-[#F5F5F5] outline-none focus:border-[#C8A84E]"
+              />
+              <input
+                type="text"
+                placeholder="Last Name"
+                required
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                className="rounded-lg border border-[#262626] bg-[#0A0A0A] px-3 py-2.5 text-sm text-[#F5F5F5] outline-none focus:border-[#C8A84E]"
+              />
+              <input
+                type="text"
+                placeholder="Address"
+                required
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                className="col-span-2 rounded-lg border border-[#262626] bg-[#0A0A0A] px-3 py-2.5 text-sm text-[#F5F5F5] outline-none focus:border-[#C8A84E]"
+              />
+              <input
+                type="text"
+                placeholder="City"
+                required
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                className="rounded-lg border border-[#262626] bg-[#0A0A0A] px-3 py-2.5 text-sm text-[#F5F5F5] outline-none focus:border-[#C8A84E]"
+              />
+              <div className="grid grid-cols-2 gap-3">
+                <input
+                  type="text"
+                  placeholder="State"
+                  required
+                  value={state}
+                  onChange={(e) => setState(e.target.value)}
+                  className="rounded-lg border border-[#262626] bg-[#0A0A0A] px-3 py-2.5 text-sm text-[#F5F5F5] outline-none focus:border-[#C8A84E]"
+                />
+                <input
+                  type="text"
+                  placeholder="ZIP"
+                  required
+                  value={zip}
+                  onChange={(e) => setZip(e.target.value)}
+                  className="rounded-lg border border-[#262626] bg-[#0A0A0A] px-3 py-2.5 text-sm text-[#F5F5F5] outline-none focus:border-[#C8A84E]"
+                />
+              </div>
+              <input
+                type="tel"
+                placeholder="Phone"
+                required
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="col-span-2 rounded-lg border border-[#262626] bg-[#0A0A0A] px-3 py-2.5 text-sm text-[#F5F5F5] outline-none focus:border-[#C8A84E]"
+              />
+            </div>
+          </div>
 
-        <button
-          onClick={handleSubscribe}
-          disabled={subscribing}
-          className="mt-6 w-full rounded-lg bg-[#C8A84E] py-4 font-bold text-black transition-colors hover:bg-[#E8D48B] disabled:opacity-50"
-        >
-          {subscribing ? "Redirecting to Stripe..." : "Subscribe Now"}
-        </button>
+          {/* Payment */}
+          <div>
+            <h3 className="text-sm font-semibold text-[#F5F5F5]">
+              Payment Details
+            </h3>
+            <div className="mt-3 space-y-3">
+              <input
+                type="text"
+                placeholder="Card Number"
+                required
+                value={cardNumber}
+                onChange={(e) => setCardNumber(e.target.value)}
+                maxLength={16}
+                className="w-full rounded-lg border border-[#262626] bg-[#0A0A0A] px-3 py-2.5 text-sm text-[#F5F5F5] outline-none focus:border-[#C8A84E]"
+              />
+              <div className="grid grid-cols-3 gap-3">
+                <input
+                  type="text"
+                  placeholder="MM"
+                  required
+                  value={expMonth}
+                  onChange={(e) => setExpMonth(e.target.value)}
+                  maxLength={2}
+                  className="rounded-lg border border-[#262626] bg-[#0A0A0A] px-3 py-2.5 text-sm text-[#F5F5F5] outline-none focus:border-[#C8A84E]"
+                />
+                <input
+                  type="text"
+                  placeholder="YYYY"
+                  required
+                  value={expYear}
+                  onChange={(e) => setExpYear(e.target.value)}
+                  maxLength={4}
+                  className="rounded-lg border border-[#262626] bg-[#0A0A0A] px-3 py-2.5 text-sm text-[#F5F5F5] outline-none focus:border-[#C8A84E]"
+                />
+                <input
+                  type="text"
+                  placeholder="CVV"
+                  required
+                  value={cvv}
+                  onChange={(e) => setCvv(e.target.value)}
+                  maxLength={4}
+                  className="rounded-lg border border-[#262626] bg-[#0A0A0A] px-3 py-2.5 text-sm text-[#F5F5F5] outline-none focus:border-[#C8A84E]"
+                />
+              </div>
+            </div>
+          </div>
 
-        <p className="mt-4 text-center text-xs text-[#A3A3A3]">
-          Cancel anytime. You&apos;ll be redirected to Stripe for secure payment.
-        </p>
+          {/* Age confirmation */}
+          <label className="flex items-start gap-2 text-sm text-[#A3A3A3]">
+            <input
+              type="checkbox"
+              checked={ageConfirmed}
+              onChange={(e) => setAgeConfirmed(e.target.checked)}
+              className="mt-0.5 accent-[#C8A84E]"
+            />
+            I confirm that I am 21 years of age or older and legally permitted
+            to purchase tobacco products.
+          </label>
+
+          {error && <p className="text-sm text-[#EF4444]">{error}</p>}
+
+          <button
+            type="submit"
+            disabled={subscribing}
+            className="w-full rounded-lg bg-[#C8A84E] py-4 font-bold text-black transition-colors hover:bg-[#E8D48B] disabled:opacity-50"
+          >
+            {subscribing ? "Processing..." : "Subscribe Now"}
+          </button>
+
+          <p className="text-center text-xs text-[#A3A3A3]">
+            Cancel anytime. Your payment is processed securely through
+            Authorize.Net. You must be 21 or older to subscribe.
+          </p>
+        </form>
       </div>
     </div>
   );

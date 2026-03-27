@@ -21,7 +21,8 @@
       "WebFetch(domain:splashfinder.app)",
       "Bash(curl -s https://unsplash.com/s/photos/cigar-smoke-dark)",
       "Bash(curl -sI https://unsplash.com/photos/TnDaYFLMoSY/download)",
-      "Bash(curl -sI https://source.unsplash.com/TnDaYFLMoSY/1920x1080)"
+      "Bash(curl -sI https://source.unsplash.com/TnDaYFLMoSY/1920x1080)",
+      "Bash(ls \"/c/Users/durty/Goats Heritage/src/app/\\(public\\)/checkout\")"
     ]
   }
 }

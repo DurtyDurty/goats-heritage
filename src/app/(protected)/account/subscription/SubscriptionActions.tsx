@@ -1,30 +1,32 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function SubscriptionActions() {
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
 
-  async function handleManage() {
+  async function handleCancel() {
+    if (!confirm("Are you sure you want to cancel your subscription?")) return;
     setLoading(true);
     try {
-      const res = await fetch("/api/stripe/portal", { method: "POST" });
+      const res = await fetch("/api/membership/cancel", { method: "POST" });
       const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
+      if (res.ok) {
+        router.refresh();
       }
-    } catch {
-      setLoading(false);
-    }
+    } catch {}
+    setLoading(false);
   }
 
   return (
     <button
-      onClick={handleManage}
+      onClick={handleCancel}
       disabled={loading}
-      className="mt-6 w-full rounded-lg border border-[#C8A84E] py-3 text-sm font-medium text-[#C8A84E] transition-colors hover:bg-[#C8A84E]/10 disabled:opacity-50"
+      className="mt-6 w-full rounded-lg border border-[#EF4444] py-3 text-sm font-medium text-[#EF4444] transition-colors hover:bg-[#EF4444]/10 disabled:opacity-50"
     >
-      {loading ? "Redirecting..." : "Manage Subscription"}
+      {loading ? "Cancelling..." : "Cancel Subscription"}
     </button>
   );
 }
