@@ -11,10 +11,12 @@ import {
   Calendar,
   ExternalLink,
   Mail,
+  MessageSquare,
 } from "lucide-react";
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/admin/inbox", label: "Inbox", icon: MessageSquare },
   { href: "/admin/products", label: "Products", icon: Package },
   { href: "/admin/orders", label: "Orders", icon: ShoppingBag },
   { href: "/admin/members", label: "Members", icon: Users },

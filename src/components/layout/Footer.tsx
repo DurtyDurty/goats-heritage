@@ -7,6 +7,7 @@ const quickLinks = [
   { href: "/membership", label: "Membership" },
   { href: "/events", label: "Events" },
   { href: "/about", label: "About" },
+  { href: "/contact", label: "Contact" },
 ];
 
 const legalLinks = [
