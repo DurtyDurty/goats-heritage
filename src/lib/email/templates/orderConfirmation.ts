@@ -25,13 +25,13 @@ export function orderConfirmation({
     .map(
       (item) => `
         <tr>
-          <td style="padding: 12px 16px; border-bottom: 1px solid #2A2A2A; color: #FFFFFF; font-family: sans-serif; font-size: 14px;">
+          <td style="padding:10px 12px;border-bottom:1px solid #e5e5e5;color:#333;font-family:Arial,sans-serif;font-size:14px;">
             ${item.name}
           </td>
-          <td style="padding: 12px 16px; border-bottom: 1px solid #2A2A2A; color: #A3A3A3; font-family: sans-serif; font-size: 14px; text-align: center;">
+          <td style="padding:10px 12px;border-bottom:1px solid #e5e5e5;color:#333;font-family:Arial,sans-serif;font-size:14px;text-align:center;">
             ${item.qty}
           </td>
-          <td style="padding: 12px 16px; border-bottom: 1px solid #2A2A2A; color: #FFFFFF; font-family: sans-serif; font-size: 14px; text-align: right;">
+          <td style="padding:10px 12px;border-bottom:1px solid #e5e5e5;color:#333;font-family:Arial,sans-serif;font-size:14px;text-align:right;">
             $${(item.price / 100).toFixed(2)}
           </td>
         </tr>`
@@ -44,61 +44,60 @@ export function orderConfirmation({
 <!DOCTYPE html>
 <html>
 <head><meta charset="utf-8" /></head>
-<body style="margin: 0; padding: 0; background-color: #0A0A0A;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #0A0A0A;">
+<body style="margin:0;padding:0;background-color:#ffffff;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#ffffff;">
     <tr>
-      <td align="center" style="padding: 40px 20px;">
-        <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; width: 100%; background-color: #141414; border-radius: 8px; overflow: hidden;">
-          <!-- Header -->
+      <td align="center" style="padding:40px 20px;">
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+          <!-- Logo -->
           <tr>
-            <td style="padding: 32px 40px; text-align: center; border-bottom: 1px solid #2A2A2A;">
-              <img src="${siteUrl}/images/logo.png" alt="Goats Heritage" height="80" style="display:block;margin:0 auto 16px auto;height:80px;width:auto;" />
-              <h1 style="margin: 0; font-family: sans-serif; font-size: 24px; font-weight: 700; letter-spacing: 3px; color: #C8A84E;">GOATS HERITAGE</h1>
+            <td style="padding:0 0 20px;text-align:center;">
+              <img src="https://www.goatsheritage.com/images/logo.png" alt="Goats Heritage" style="display:block;margin:0 auto 20px;height:60px;width:auto;" />
             </td>
           </tr>
           <!-- Body -->
           <tr>
-            <td style="padding: 40px;">
-              <h2 style="margin: 0 0 16px; font-family: sans-serif; font-size: 22px; color: #FFFFFF;">Order Confirmed</h2>
-              <p style="margin: 0 0 8px; font-family: sans-serif; font-size: 15px; color: #A3A3A3;">
+            <td style="padding:0 0 32px;">
+              <h2 style="margin:0 0 16px;font-family:Arial,sans-serif;font-size:22px;color:#333;">Order Confirmed</h2>
+              <p style="margin:0 0 8px;font-family:Arial,sans-serif;font-size:14px;line-height:1.7;color:#333;">
                 Hey ${customerName},
               </p>
-              <p style="margin: 0 0 24px; font-family: sans-serif; font-size: 15px; color: #A3A3A3;">
+              <p style="margin:0 0 24px;font-family:Arial,sans-serif;font-size:14px;line-height:1.7;color:#333;">
                 Thank you for your order. We're getting it ready for you.
               </p>
-              <p style="margin: 0 0 24px; font-family: sans-serif; font-size: 14px; color: #A3A3A3;">
-                Order Number: <strong style="color: #FFFFFF;">${orderNumber}</strong>
+              <p style="margin:0 0 24px;font-family:Arial,sans-serif;font-size:14px;line-height:1.7;color:#333;">
+                Order Number: <strong>${orderNumber}</strong>
               </p>
 
               <!-- Items Table -->
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 24px;">
-                <tr>
-                  <th style="padding: 12px 16px; text-align: left; border-bottom: 2px solid #C8A84E; color: #C8A84E; font-family: sans-serif; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Item</th>
-                  <th style="padding: 12px 16px; text-align: center; border-bottom: 2px solid #C8A84E; color: #C8A84E; font-family: sans-serif; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Qty</th>
-                  <th style="padding: 12px 16px; text-align: right; border-bottom: 2px solid #C8A84E; color: #C8A84E; font-family: sans-serif; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Price</th>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;border-collapse:collapse;border:1px solid #e5e5e5;">
+                <tr style="background-color:#f5f5f5;">
+                  <th style="padding:10px 12px;text-align:left;border-bottom:1px solid #e5e5e5;color:#333;font-family:Arial,sans-serif;font-size:13px;font-weight:600;">Item</th>
+                  <th style="padding:10px 12px;text-align:center;border-bottom:1px solid #e5e5e5;color:#333;font-family:Arial,sans-serif;font-size:13px;font-weight:600;">Qty</th>
+                  <th style="padding:10px 12px;text-align:right;border-bottom:1px solid #e5e5e5;color:#333;font-family:Arial,sans-serif;font-size:13px;font-weight:600;">Price</th>
                 </tr>
                 ${itemRows}
               </table>
 
               <!-- Total -->
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 24px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
                 <tr>
-                  <td style="padding: 12px 16px; font-family: sans-serif; font-size: 16px; font-weight: 700; color: #FFFFFF;">Total</td>
-                  <td style="padding: 12px 16px; font-family: sans-serif; font-size: 16px; font-weight: 700; color: #C8A84E; text-align: right;">$${(total / 100).toFixed(2)}</td>
+                  <td style="padding:10px 12px;font-family:Arial,sans-serif;font-size:16px;font-weight:700;color:#333;">Total</td>
+                  <td style="padding:10px 12px;font-family:Arial,sans-serif;font-size:16px;font-weight:700;color:#333;text-align:right;">$${(total / 100).toFixed(2)}</td>
                 </tr>
               </table>
 
               <!-- Shipping Address -->
-              <p style="margin: 0 0 4px; font-family: sans-serif; font-size: 12px; color: #C8A84E; text-transform: uppercase; letter-spacing: 1px;">Shipping Address</p>
-              <p style="margin: 0 0 32px; font-family: sans-serif; font-size: 14px; color: #A3A3A3; line-height: 1.5;">
+              <p style="margin:0 0 4px;font-family:Arial,sans-serif;font-size:13px;color:#666;font-weight:600;">Shipping Address</p>
+              <p style="margin:0 0 32px;font-family:Arial,sans-serif;font-size:14px;color:#333;line-height:1.7;">
                 ${shippingAddress}
               </p>
 
               <!-- CTA Button -->
-              <table role="presentation" cellpadding="0" cellspacing="0" style="margin: 0 auto;">
+              <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;">
                 <tr>
-                  <td style="border-radius: 6px; background-color: #C8A84E;">
-                    <a href="${siteUrl}/account/orders" target="_blank" style="display: inline-block; padding: 14px 32px; font-family: sans-serif; font-size: 14px; font-weight: 700; color: #0A0A0A; text-decoration: none; letter-spacing: 0.5px;">View Order</a>
+                  <td>
+                    <a href="${siteUrl}/account/orders" target="_blank" style="display:inline-block;padding:12px 24px;background:#C8A84E;color:#000;font-family:Arial,sans-serif;font-weight:bold;text-decoration:none;border-radius:6px;font-size:14px;">View Order</a>
                   </td>
                 </tr>
               </table>
@@ -106,11 +105,11 @@ export function orderConfirmation({
           </tr>
           <!-- Footer -->
           <tr>
-            <td style="padding: 24px 40px; border-top: 1px solid #2A2A2A; text-align: center;">
-              <p style="margin: 0 0 8px; font-family: sans-serif; font-size: 11px; color: #A3A3A3;">
-                This product is derived from tobacco. Nicotine is an addictive chemical.
+            <td style="padding:24px 0 0;border-top:1px solid #e5e5e5;text-align:center;">
+              <p style="margin:0 0 8px;font-family:Arial,sans-serif;font-size:12px;color:#999;">
+                <a href="https://www.goatsheritage.com" style="color:#C8A84E;text-decoration:none;">Goats Heritage&#8482; | goatsheritage.com</a>
               </p>
-              <p style="margin: 0; font-family: sans-serif; font-size: 11px; color: #A3A3A3;">
+              <p style="margin:0;font-family:Arial,sans-serif;font-size:11px;color:#999;">
                 &copy; ${new Date().getFullYear()} Goats Heritage. All rights reserved.
               </p>
             </td>
