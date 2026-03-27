@@ -66,6 +66,33 @@ export default async function AccountPage() {
             </Link>
           </div>
         </div>
+
+        {profile?.role === "admin" && (
+          <div className="mt-6 rounded-xl border-2 border-[#C8A84E] bg-[#C8A84E]/5 p-6">
+            <h2 className="text-lg font-bold text-[#C8A84E]">Admin Panel</h2>
+            <p className="mt-1 text-sm text-[#A3A3A3]">Manage your store, orders, and customers.</p>
+            <div className="mt-4 grid grid-cols-2 gap-3">
+              <Link href="/admin" className="rounded-lg bg-[#C8A84E] py-2.5 text-center text-sm font-bold text-black transition-colors hover:bg-[#E8D48B]">
+                Dashboard
+              </Link>
+              <Link href="/admin/inbox" className="rounded-lg border border-[#C8A84E] py-2.5 text-center text-sm font-medium text-[#C8A84E] transition-colors hover:bg-[#C8A84E]/10">
+                Inbox
+              </Link>
+              <Link href="/admin/customers" className="rounded-lg border border-[#C8A84E] py-2.5 text-center text-sm font-medium text-[#C8A84E] transition-colors hover:bg-[#C8A84E]/10">
+                Customers
+              </Link>
+              <Link href="/admin/products" className="rounded-lg border border-[#C8A84E] py-2.5 text-center text-sm font-medium text-[#C8A84E] transition-colors hover:bg-[#C8A84E]/10">
+                Products
+              </Link>
+              <Link href="/admin/orders" className="rounded-lg border border-[#C8A84E] py-2.5 text-center text-sm font-medium text-[#C8A84E] transition-colors hover:bg-[#C8A84E]/10">
+                Orders
+              </Link>
+              <Link href="/admin/newsletter" className="rounded-lg border border-[#C8A84E] py-2.5 text-center text-sm font-medium text-[#C8A84E] transition-colors hover:bg-[#C8A84E]/10">
+                Newsletter
+              </Link>
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );
