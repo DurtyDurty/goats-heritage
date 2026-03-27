@@ -27,7 +27,7 @@ export default async function HomePage() {
 
         <div className="relative z-10 px-4 text-center">
           <div className="animate-fade-in">
-            <Image src="/images/logo.png" alt="Goats Heritage" width={400} height={200} className="mx-auto h-48 w-auto md:h-56" />
+            <Image src="/images/logo.png" alt="Goats Heritage" width={500} height={500} className="mx-auto h-56 w-auto sm:h-64 md:h-72 lg:h-80" />
           </div>
 
           <h1 className="mt-8 text-5xl font-bold leading-tight md:text-7xl">
