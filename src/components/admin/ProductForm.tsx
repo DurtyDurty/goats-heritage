@@ -209,7 +209,7 @@ export default function ProductForm({ product, open, onClose, onSaved }: Props) 
                 <option value="cigar">Cigar</option>
                 <option value="apparel">Apparel</option>
                 <option value="accessory">Accessory</option>
-                <option value="lifestyle">Lifestyle</option>
+                <option value="coffee">Coffee</option>
               </select>
             </div>
             <div>

@@ -8,7 +8,7 @@ const categories = [
   { value: "cigar", label: "Cigars" },
   { value: "apparel", label: "Apparel" },
   { value: "accessory", label: "Accessories" },
-  { value: "lifestyle", label: "Lifestyle" },
+  { value: "coffee", label: "Coffee" },
 ];
 
 const sortOptions = [

@@ -3,7 +3,7 @@ export interface Product {
   name: string;
   slug: string;
   description: string | null;
-  category: "cigar" | "apparel" | "accessory" | "lifestyle";
+  category: "cigar" | "apparel" | "accessory" | "coffee";
   price_cents: number;
   compare_at_price_cents: number | null;
   images: string[];
@@ -24,5 +24,5 @@ export const CATEGORY_LABELS: Record<string, string> = {
   cigar: "Cigars",
   apparel: "Apparel",
   accessory: "Accessories",
-  lifestyle: "Lifestyle",
+  coffee: "Coffee",
 };
