@@ -38,7 +38,11 @@ function LoginForm() {
       return;
     }
 
-    window.location.href = "/account";
+    // Use anchor tag click to force full browser navigation
+    const a = document.createElement("a");
+    a.href = "/account";
+    document.body.appendChild(a);
+    a.click();
   }
 
   async function handleGoogleLogin() {
