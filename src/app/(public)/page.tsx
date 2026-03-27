@@ -129,9 +129,16 @@ export default async function HomePage() {
             </Link>
           </div>
 
-          {/* Right — placeholder image */}
+          {/* Right — lifestyle image */}
           <div className="flex items-center justify-center">
-            <div className="aspect-[4/5] w-full max-w-sm rounded-xl border border-[#C8A84E]/20 bg-[#1A1A1A]" />
+            <div className="relative aspect-[4/5] w-full max-w-sm overflow-hidden rounded-xl border border-[#C8A84E]/20">
+              <Image
+                src="https://images.unsplash.com/photo-1592862080230-fe0a3b380f21?w=800&q=80"
+                alt="Premium cigar and whiskey"
+                fill
+                className="object-cover"
+              />
+            </div>
           </div>
         </div>
       </section>
