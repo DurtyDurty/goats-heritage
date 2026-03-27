@@ -4,10 +4,10 @@ import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 
 const slides = [
-  "https://images.unsplash.com/photo-1416339134316-0e91dc9ded92?w=1920&q=80",
-  "https://images.unsplash.com/photo-1598971457999-ca4ef48a9a71?w=1920&q=80",
-  "https://images.unsplash.com/photo-1528458876861-544fd1531a40?w=1920&q=80",
-  "https://images.unsplash.com/photo-1623266346924-f2942e6d3cc3?w=1920&q=80",
+  "https://images.unsplash.com/photo-1478445214834-5e36de9923d7?w=1920&q=80",
+  "https://images.unsplash.com/photo-1553433342-956cde1d7646?w=1920&q=80",
+  "https://images.unsplash.com/photo-1709526494925-a2780a094838?w=1920&q=80",
+  "https://images.unsplash.com/photo-1524335672824-627a98049dfa?w=1920&q=80",
 ];
 
 export default function HeroCarousel() {
