@@ -24,6 +24,19 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
+      <head>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-VC74W9MQQX" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-VC74W9MQQX');
+            `,
+          }}
+        />
+      </head>
       <body className={`${inter.className} bg-[#0A0A0A] text-[#F5F5F5]`}>
         <CartProvider>
           <ToastProvider>
