@@ -4,13 +4,7 @@ import ProductCard from "@/components/shop/ProductCard";
 import HeroCarousel from "@/components/home/HeroCarousel";
 import { MapPin } from "lucide-react";
 import { type Product } from "@/lib/types";
-
-const featuredProducts: Product[] = [
-  { id: "1", name: "Heritage Robusto", slug: "heritage-robusto", description: null, category: "cigar", price_cents: 1800, compare_at_price_cents: null, images: [], inventory_count: 20, is_active: true, is_member_exclusive: false, metadata: {}, stripe_price_id: null, created_at: "", updated_at: "" },
-  { id: "2", name: "Legacy Toro", slug: "legacy-toro", description: null, category: "cigar", price_cents: 2200, compare_at_price_cents: null, images: [], inventory_count: 15, is_active: true, is_member_exclusive: false, metadata: {}, stripe_price_id: null, created_at: "", updated_at: "" },
-  { id: "3", name: "Crown Churchill", slug: "crown-churchill", description: null, category: "cigar", price_cents: 2800, compare_at_price_cents: null, images: [], inventory_count: 10, is_active: true, is_member_exclusive: false, metadata: {}, stripe_price_id: null, created_at: "", updated_at: "" },
-  { id: "4", name: "Gold Label Sampler", slug: "gold-label-sampler", description: null, category: "cigar", price_cents: 6500, compare_at_price_cents: null, images: [], inventory_count: 8, is_active: true, is_member_exclusive: true, metadata: {}, stripe_price_id: null, created_at: "", updated_at: "" },
-];
+import { createClient } from "@/lib/supabase/server";
 
 const upcomingEvents = [
   {
@@ -33,7 +27,16 @@ const upcomingEvents = [
   },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  const supabase = createClient();
+
+  const { data: featuredProducts } = await supabase
+    .from("products")
+    .select("*")
+    .eq("is_active", true)
+    .order("created_at", { ascending: false })
+    .limit(4);
+
   return (
     <>
       {/* ── Hero ── */}
@@ -86,7 +89,7 @@ export default function HomePage() {
           </div>
 
           <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {featuredProducts.map((product) => (
+            {((featuredProducts as Product[]) || []).map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
