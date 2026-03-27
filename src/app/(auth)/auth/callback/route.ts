@@ -62,5 +62,5 @@ export async function GET(request: Request) {
     }
   }
 
-  return NextResponse.redirect(`${origin}/account`);
+  return NextResponse.redirect(`${origin}/`);
 }

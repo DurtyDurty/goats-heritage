@@ -58,12 +58,12 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Auth routes — redirect to account if already logged in
+  // Auth routes — redirect to home if already logged in
   if (
     (pathname === "/login" || pathname === "/signup") &&
     user
   ) {
-    return NextResponse.redirect(new URL("/account", request.url));
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
   return supabaseResponse;
