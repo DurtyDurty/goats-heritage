@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
@@ -26,9 +27,7 @@ export default function AdminSidebar() {
     <aside className="fixed left-0 top-0 z-40 flex h-screen w-64 flex-col border-r border-[#262626] bg-[#141414]">
       {/* Logo */}
       <div className="border-b border-[#262626] px-6 py-5">
-        <p className="text-lg font-bold tracking-wider text-[#C8A84E]">
-          GOATS HERITAGE
-        </p>
+        <Image src="/images/logo.png" alt="Goats Heritage™" width={140} height={56} className="h-12 w-auto" />
         <span className="mt-1 inline-block rounded bg-[#C8A84E]/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#C8A84E]">
           Admin
         </span>

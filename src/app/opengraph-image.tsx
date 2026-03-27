@@ -54,7 +54,7 @@ export default async function OgImage() {
             marginTop: 32,
           }}
         >
-          GOATS HERITAGE
+          GOATS HERITAGE™
         </div>
         <div
           style={{

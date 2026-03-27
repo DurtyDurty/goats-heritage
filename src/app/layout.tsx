@@ -7,7 +7,7 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Goats Heritage | Premium Cigars & Lifestyle",
+  title: "Goats Heritage™ | Premium Cigars & Lifestyle",
   description:
     "Premium cigars, curated memberships, and exclusive lifestyle products. Elevating tradition with sophistication for the modern connoisseur.",
   icons: {

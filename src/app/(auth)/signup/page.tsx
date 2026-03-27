@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
@@ -65,9 +66,7 @@ export default function SignupPage() {
     <div className="flex min-h-[80vh] items-center justify-center px-4">
       <div className="w-full max-w-md rounded-xl border border-[#262626] bg-[#141414] p-8">
         <div className="text-center">
-          <h2 className="text-lg font-bold tracking-wider text-[#C8A84E]">
-            GOATS HERITAGE
-          </h2>
+          <Image src="/images/logo.png" alt="Goats Heritage™" width={160} height={80} className="mx-auto h-20 w-auto" />
           <h1 className="mt-4 text-2xl font-bold text-[#F5F5F5]">
             Create Account
           </h1>

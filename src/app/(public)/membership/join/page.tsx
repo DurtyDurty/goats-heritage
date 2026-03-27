@@ -7,6 +7,7 @@ declare global {
 }
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Check } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -155,9 +156,7 @@ export default function JoinPage() {
     <div className="flex min-h-[70vh] items-center justify-center px-4 py-12">
       <div className="w-full max-w-lg rounded-2xl border-2 border-[#C8A84E] bg-[#141414] p-8">
         <div className="text-center">
-          <h2 className="text-lg font-bold tracking-wider text-[#C8A84E]">
-            GOATS HERITAGE
-          </h2>
+          <Image src="/images/logo.png" alt="Goats Heritage™" width={160} height={80} className="mx-auto h-20 w-auto" />
           <h1 className="mt-4 text-2xl font-bold text-[#F5F5F5]">
             Confirm Your Membership
           </h1>

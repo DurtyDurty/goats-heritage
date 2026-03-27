@@ -25,7 +25,7 @@ export default function Footer() {
           {/* Brand */}
           <div>
             <h3 className="text-lg font-bold tracking-wider text-[#C8A84E]">
-              GOATS HERITAGE
+              GOATS HERITAGE™
             </h3>
             <p className="mt-3 text-sm leading-relaxed text-[#A3A3A3]">
               Premium cigars and lifestyle products curated for the modern
@@ -93,7 +93,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="mt-12 border-t border-[#262626] pt-6">
           <p className="text-center text-sm text-[#A3A3A3]">
-            &copy; 2026 Goats Heritage. All rights reserved.
+            &copy; 2026 Goats Heritage™. All rights reserved.
           </p>
           <p className="mt-2 text-center text-xs text-[#A3A3A3]/60">
             You must be 21 years or older to purchase tobacco products.
