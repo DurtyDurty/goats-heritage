@@ -14,6 +14,7 @@ export default function SignupPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
 
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault();
@@ -46,20 +47,39 @@ export default function SignupPage() {
       return;
     }
 
-    // Update profile full_name
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    setLoading(false);
+    setEmailSent(true);
+  }
 
-    if (user) {
-      await supabase
-        .from("profiles")
-        .update({ full_name: fullName })
-        .eq("id", user.id);
-    }
-
-    router.push("/auth/verify-age");
-    router.refresh();
+  if (emailSent) {
+    return (
+      <div className="flex min-h-[80vh] items-center justify-center px-4">
+        <div className="w-full max-w-md rounded-xl border border-[#262626] bg-[#141414] p-8 text-center">
+          <Image src="/images/logo.png" alt="Goats Heritage™" width={160} height={80} className="mx-auto h-20 w-auto" />
+          <h1 className="mt-4 text-2xl font-bold text-[#F5F5F5]">
+            Check Your Email
+          </h1>
+          <p className="mt-3 leading-relaxed text-[#A3A3A3]">
+            We sent a verification link to{" "}
+            <span className="font-medium text-[#C8A84E]">{email}</span>.
+            Please verify your email to complete your registration.
+          </p>
+          <div className="mx-auto my-6 h-px w-16 bg-[#C8A84E]/40" />
+          <p className="text-sm text-[#A3A3A3]">
+            After verifying, you&apos;ll be able to sign in and complete your age verification.
+          </p>
+          <Link
+            href="/login"
+            className="mt-6 inline-block rounded-lg bg-[#C8A84E] px-8 py-3 font-bold text-black transition-colors hover:bg-[#E8D48B]"
+          >
+            Go to Sign In
+          </Link>
+          <p className="mt-4 text-xs text-[#A3A3A3]">
+            Didn&apos;t receive it? Check your spam folder.
+          </p>
+        </div>
+      </div>
+    );
   }
 
   return (

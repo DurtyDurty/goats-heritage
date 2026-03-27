@@ -42,6 +42,15 @@ export async function GET(request: Request) {
   } = await supabase.auth.getUser();
 
   if (user) {
+    // Update profile name from signup metadata if not set
+    const fullName = user.user_metadata?.full_name;
+    if (fullName) {
+      await supabase
+        .from("profiles")
+        .update({ full_name: fullName })
+        .eq("id", user.id);
+    }
+
     const { data: profile } = await supabase
       .from("profiles")
       .select("date_of_birth")
