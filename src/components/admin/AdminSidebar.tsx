@@ -26,11 +26,11 @@ const navItems = [
   { href: "/admin/newsletter", label: "Newsletter", icon: Mail },
 ];
 
-export default function AdminSidebar() {
+export default function AdminSidebar({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
 
   return (
-    <aside className="fixed left-0 top-0 z-40 flex h-screen w-64 flex-col border-r border-[#262626] bg-[#141414]">
+    <aside className="flex h-screen w-64 flex-col border-r border-[#262626] bg-[#141414]">
       {/* Logo */}
       <div className="border-b border-[#262626] px-6 py-5">
         <Image src="/images/logo.png" alt="Goats Heritage™" width={140} height={56} className="h-12 w-auto" />
@@ -50,6 +50,7 @@ export default function AdminSidebar() {
             <Link
               key={item.href}
               href={item.href}
+              onClick={onNavigate}
               className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
                 isActive
                   ? "border-l-2 border-[#C8A84E] bg-[#C8A84E]/10 text-[#C8A84E]"
