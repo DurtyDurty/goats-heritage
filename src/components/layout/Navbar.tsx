@@ -112,7 +112,7 @@ export default function Navbar() {
           </Link>
 
           {/* Center nav links - desktop */}
-          <div className="hidden items-center gap-8 md:flex">
+          <div className="hidden items-center gap-4 lg:gap-6 lg:flex">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
@@ -142,7 +142,7 @@ export default function Navbar() {
 
             {/* Auth - desktop */}
             {user ? (
-              <div className="relative hidden md:block" ref={userMenuRef}>
+              <div className="relative hidden lg:block" ref={userMenuRef}>
                 <button
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
                   className="flex h-8 w-8 items-center justify-center rounded-full border border-[#C8A84E] text-[#C8A84E] transition-colors hover:bg-[#C8A84E] hover:text-[#0A0A0A]"
@@ -189,7 +189,7 @@ export default function Navbar() {
             ) : (
               <Link
                 href="/login"
-                className="hidden items-center gap-2 rounded-md border border-[#C8A84E] px-4 py-1.5 text-sm font-medium text-[#C8A84E] transition-colors hover:bg-[#C8A84E] hover:text-[#0A0A0A] md:flex"
+                className="hidden items-center gap-2 rounded-md border border-[#C8A84E] px-4 py-1.5 text-sm font-medium text-[#C8A84E] transition-colors hover:bg-[#C8A84E] hover:text-[#0A0A0A] lg:flex"
               >
                 <User className="h-4 w-4" />
                 Sign In
@@ -199,7 +199,7 @@ export default function Navbar() {
             {/* Mobile menu button */}
             <button
               onClick={() => setMobileOpen(true)}
-              className="text-[#A3A3A3] transition-colors hover:text-[#F5F5F5] md:hidden"
+              className="text-[#A3A3A3] transition-colors hover:text-[#F5F5F5] lg:hidden"
               aria-label="Open menu"
             >
               <Menu className="h-6 w-6" />
