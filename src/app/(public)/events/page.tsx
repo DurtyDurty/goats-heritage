@@ -42,8 +42,7 @@ export default async function EventsPage() {
             Lounge &amp; <span className="text-[#C8A84E]">Events</span>
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-[#A3A3A3]">
-            Exclusive cigar lounge experiences, tastings, and social events.
-            Connect with the community and elevate your lifestyle.
+            Tune in on our social media for upcoming events.
           </p>
         </div>
       </section>

@@ -166,7 +166,7 @@ export default async function HomePage() {
             </h2>
             <div className="mx-auto mt-3 h-px w-16 bg-[#C8A84E]/40" />
             <p className="mt-4 text-[#A3A3A3]">
-              Connect, celebrate, and enjoy the culture in person.
+              Tune in on our social media for upcoming events.
             </p>
           </div>
 
