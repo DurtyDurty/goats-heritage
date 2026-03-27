@@ -5,7 +5,7 @@ import { subscriptionWelcome } from "./templates/subscriptionWelcome";
 import { subscriptionRenewal } from "./templates/subscriptionRenewal";
 import { paymentFailed } from "./templates/paymentFailed";
 
-const FROM = "Goats Heritage <orders@goatsheritage.com>";
+const FROM = "Goats Heritage <contact@goatsheritage.com>";
 
 export async function sendOrderConfirmation(
   to: string,

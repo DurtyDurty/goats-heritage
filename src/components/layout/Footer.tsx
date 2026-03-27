@@ -32,6 +32,12 @@ export default function Footer() {
               Premium cigars and lifestyle products curated for the modern
               connoisseur. Elevating tradition with sophistication.
             </p>
+            <a
+              href="mailto:contact@goatsheritage.com"
+              className="mt-3 inline-block text-sm text-[#C8A84E] transition-colors hover:text-[#E8D48B]"
+            >
+              contact@goatsheritage.com
+            </a>
           </div>
 
           {/* Quick Links */}
