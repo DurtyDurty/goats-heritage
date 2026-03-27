@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
@@ -49,6 +50,13 @@ export default async function AccountPage() {
               </span>
             </div>
           </div>
+
+          <Link
+            href="/account/edit"
+            className="mt-6 inline-block w-full rounded-lg border border-[#C8A84E] py-3 text-center text-sm font-medium text-[#C8A84E] transition-colors hover:bg-[#C8A84E]/10"
+          >
+            Edit Profile
+          </Link>
         </div>
       </div>
     </section>
