@@ -51,12 +51,26 @@ export default async function AccountPage() {
             </div>
           </div>
 
-          <Link
-            href="/account/edit"
-            className="mt-6 inline-block w-full rounded-lg border border-[#C8A84E] py-3 text-center text-sm font-medium text-[#C8A84E] transition-colors hover:bg-[#C8A84E]/10"
-          >
-            Edit Profile
-          </Link>
+          <div className="mt-6 flex flex-col gap-3">
+            <Link
+              href="/account/orders"
+              className="block w-full rounded-lg bg-[#C8A84E] py-3 text-center text-sm font-bold text-black transition-colors hover:bg-[#E8D48B]"
+            >
+              My Orders
+            </Link>
+            <Link
+              href="/account/subscription"
+              className="block w-full rounded-lg border border-[#C8A84E] py-3 text-center text-sm font-medium text-[#C8A84E] transition-colors hover:bg-[#C8A84E]/10"
+            >
+              Membership
+            </Link>
+            <Link
+              href="/account/edit"
+              className="block w-full rounded-lg border border-[#262626] py-3 text-center text-sm font-medium text-[#A3A3A3] transition-colors hover:bg-[#1A1A1A]"
+            >
+              Edit Profile
+            </Link>
+          </div>
         </div>
       </div>
     </section>
