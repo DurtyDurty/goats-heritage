@@ -21,7 +21,7 @@ function LoginForm() {
     setLoading(true);
 
     const supabase = createClient();
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
@@ -32,7 +32,13 @@ function LoginForm() {
       return;
     }
 
-    window.location.href = redirectTo;
+    if (!data.session) {
+      setError("Email not verified. Please check your inbox and verify your email first.");
+      setLoading(false);
+      return;
+    }
+
+    window.location.replace(redirectTo);
   }
 
   async function handleGoogleLogin() {
