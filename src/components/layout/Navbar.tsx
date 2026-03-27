@@ -79,8 +79,8 @@ export default function Navbar() {
 
   return (
     <>
-      <div className="bg-[#0A0A0A] py-1.5 text-center text-[11px] tracking-widest text-[#A3A3A3]/70">
-        🇺🇸 Veteran-Owned &amp; Operated
+      <div className="bg-[#0A0A0A] px-4 py-1.5 text-right text-[11px] tracking-widest text-[#A3A3A3]/70 sm:px-6 lg:px-8">
+        Veteran-Owned &amp; Operated
       </div>
       <nav
         className={`sticky top-0 z-50 transition-all duration-300 ${
