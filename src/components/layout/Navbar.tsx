@@ -92,7 +92,10 @@ export default function Navbar() {
   return (
     <>
       <div className="bg-[#0A0A0A] px-4 py-1.5 text-right text-[11px] tracking-widest text-[#A3A3A3]/70 sm:px-6 lg:px-8">
-        ★ Veteran-Owned &amp; Operated ★
+        <span className="inline-flex items-center gap-1.5">
+          <svg className="h-3 w-4" viewBox="0 0 32 20" fill="none"><rect width="32" height="20" fill="#B22234"/><rect y="3" width="32" height="1.5" fill="#fff"/><rect y="6" width="32" height="1.5" fill="#fff"/><rect y="9" width="32" height="1.5" fill="#fff"/><rect y="12" width="32" height="1.5" fill="#fff"/><rect y="15" width="32" height="1.5" fill="#fff"/><rect y="18" width="32" height="1.5" fill="#fff"/><rect width="14" height="10.5" fill="#3C3B6E"/><circle cx="2" cy="1.5" r="0.6" fill="#fff"/><circle cx="4.5" cy="1.5" r="0.6" fill="#fff"/><circle cx="7" cy="1.5" r="0.6" fill="#fff"/><circle cx="9.5" cy="1.5" r="0.6" fill="#fff"/><circle cx="12" cy="1.5" r="0.6" fill="#fff"/><circle cx="3.25" cy="3.2" r="0.6" fill="#fff"/><circle cx="5.75" cy="3.2" r="0.6" fill="#fff"/><circle cx="8.25" cy="3.2" r="0.6" fill="#fff"/><circle cx="10.75" cy="3.2" r="0.6" fill="#fff"/><circle cx="2" cy="5" r="0.6" fill="#fff"/><circle cx="4.5" cy="5" r="0.6" fill="#fff"/><circle cx="7" cy="5" r="0.6" fill="#fff"/><circle cx="9.5" cy="5" r="0.6" fill="#fff"/><circle cx="12" cy="5" r="0.6" fill="#fff"/><circle cx="3.25" cy="6.7" r="0.6" fill="#fff"/><circle cx="5.75" cy="6.7" r="0.6" fill="#fff"/><circle cx="8.25" cy="6.7" r="0.6" fill="#fff"/><circle cx="10.75" cy="6.7" r="0.6" fill="#fff"/><circle cx="2" cy="8.5" r="0.6" fill="#fff"/><circle cx="4.5" cy="8.5" r="0.6" fill="#fff"/><circle cx="7" cy="8.5" r="0.6" fill="#fff"/><circle cx="9.5" cy="8.5" r="0.6" fill="#fff"/><circle cx="12" cy="8.5" r="0.6" fill="#fff"/></svg>
+          Veteran-Owned &amp; Operated
+        </span>
       </div>
       <nav
         className={`sticky top-0 z-50 transition-all duration-300 ${
