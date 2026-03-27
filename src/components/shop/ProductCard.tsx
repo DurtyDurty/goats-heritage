@@ -39,11 +39,11 @@ export default function ProductCard({ product }: { product: Product }) {
               <Image
                 src="/images/logo.png"
                 alt="Goats Heritage"
-                width={120}
-                height={60}
-                className="h-16 w-auto opacity-90"
+                width={200}
+                height={100}
+                className="h-24 w-auto sm:h-28 opacity-90"
               />
-              <span className="mt-3 rounded-full bg-[#C8A84E]/10 px-4 py-1 text-xs font-bold uppercase tracking-widest text-[#C8A84E]">
+              <span className="mt-4 rounded-full bg-[#C8A84E]/10 px-5 py-1.5 text-sm font-bold uppercase tracking-widest text-[#C8A84E]">
                 Coming Soon
               </span>
             </div>
@@ -53,11 +53,11 @@ export default function ProductCard({ product }: { product: Product }) {
             <Image
               src="/images/logo.png"
               alt="Goats Heritage"
-              width={120}
-              height={60}
-              className="h-16 w-auto opacity-60"
+              width={200}
+              height={100}
+              className="h-24 w-auto sm:h-28 opacity-60"
             />
-            <span className="mt-3 rounded-full bg-[#C8A84E]/10 px-4 py-1 text-xs font-bold uppercase tracking-widest text-[#C8A84E]">
+            <span className="mt-4 rounded-full bg-[#C8A84E]/10 px-5 py-1.5 text-sm font-bold uppercase tracking-widest text-[#C8A84E]">
               Coming Soon
             </span>
           </div>
