@@ -25,6 +25,7 @@ export default function AdminNewsletterPage() {
   const [broadcastSending, setBroadcastSending] = useState(false);
   const [broadcastConfirm, setBroadcastConfirm] = useState(false);
   const [broadcastResult, setBroadcastResult] = useState<{ message: string; success: boolean } | null>(null);
+  const [testSending, setTestSending] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -232,17 +233,46 @@ export default function AdminNewsletterPage() {
                 </p>
               )}
 
-              <button
-                onClick={handleBroadcast}
-                disabled={broadcastSending || !broadcastSubject || !broadcastMessage || broadcastResult?.success}
-                className="w-full rounded-lg bg-[#C8A84E] py-3 font-bold text-black hover:bg-[#E8D48B] disabled:opacity-50"
-              >
-                {broadcastSending
-                  ? "Sending..."
-                  : broadcastConfirm
-                  ? "Confirm Send to All"
-                  : "Send to All"}
-              </button>
+              <div className="flex gap-3">
+                <button
+                  onClick={async () => {
+                    if (!broadcastSubject || !broadcastMessage) return;
+                    setTestSending(true);
+                    setBroadcastResult(null);
+                    try {
+                      const res = await fetch("/api/admin/inbox/send", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          to: "herson.m.sanchez@outlook.com",
+                          subject: `[TEST] ${broadcastSubject}`,
+                          message: broadcastMessage,
+                        }),
+                      });
+                      if (!res.ok) throw new Error("Failed to send test");
+                      setBroadcastResult({ message: "Test sent to your email!", success: true });
+                    } catch (err: any) {
+                      setBroadcastResult({ message: err.message, success: false });
+                    }
+                    setTestSending(false);
+                  }}
+                  disabled={testSending || !broadcastSubject || !broadcastMessage}
+                  className="flex-1 rounded-lg border border-[#262626] py-3 text-sm font-medium text-[#A3A3A3] hover:bg-[#1A1A1A] disabled:opacity-50"
+                >
+                  {testSending ? "Sending..." : "Send Test to Me"}
+                </button>
+                <button
+                  onClick={handleBroadcast}
+                  disabled={broadcastSending || !broadcastSubject || !broadcastMessage}
+                  className="flex-1 rounded-lg bg-[#C8A84E] py-3 font-bold text-black hover:bg-[#E8D48B] disabled:opacity-50"
+                >
+                  {broadcastSending
+                    ? "Sending..."
+                    : broadcastConfirm
+                    ? "Confirm Send to All"
+                    : "Send to All"}
+                </button>
+              </div>
             </div>
           </div>
         </div>
