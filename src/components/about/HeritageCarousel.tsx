@@ -32,7 +32,7 @@ export default function HeritageCarousel() {
 
   return (
     <div
-      className="relative aspect-[4/5] w-full max-w-lg overflow-hidden rounded-xl border border-[#C8A84E]/20"
+      className="relative aspect-[3/4] w-full max-w-lg overflow-hidden rounded-xl border border-[#C8A84E]/20 sm:aspect-square"
       onMouseEnter={() => { paused.current = true; }}
       onMouseLeave={() => { paused.current = false; }}
     >
