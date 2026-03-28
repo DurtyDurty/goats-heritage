@@ -13,6 +13,7 @@ import {
   ExternalLink,
   Mail,
   MessageSquare,
+  Warehouse,
 } from "lucide-react";
 
 const navItems = [
@@ -20,6 +21,7 @@ const navItems = [
   { href: "/admin/inbox", label: "Inbox", icon: MessageSquare },
   { href: "/admin/customers", label: "Customers", icon: UserCircle },
   { href: "/admin/products", label: "Products", icon: Package },
+  { href: "/admin/inventory", label: "Inventory", icon: Warehouse },
   { href: "/admin/orders", label: "Orders", icon: ShoppingBag },
   { href: "/admin/members", label: "Members", icon: Users },
   { href: "/admin/events", label: "Events", icon: Calendar },

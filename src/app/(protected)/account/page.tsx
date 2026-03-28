@@ -84,6 +84,9 @@ export default async function AccountPage() {
               <Link href="/admin/products" className="rounded-lg border border-[#C8A84E] py-2.5 text-center text-sm font-medium text-[#C8A84E] transition-colors hover:bg-[#C8A84E]/10">
                 Products
               </Link>
+              <Link href="/admin/inventory" className="rounded-lg border border-[#C8A84E] py-2.5 text-center text-sm font-medium text-[#C8A84E] transition-colors hover:bg-[#C8A84E]/10">
+                Inventory
+              </Link>
               <Link href="/admin/orders" className="rounded-lg border border-[#C8A84E] py-2.5 text-center text-sm font-medium text-[#C8A84E] transition-colors hover:bg-[#C8A84E]/10">
                 Orders
               </Link>
