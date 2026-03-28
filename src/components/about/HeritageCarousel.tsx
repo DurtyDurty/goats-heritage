@@ -4,15 +4,15 @@ import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 
 const slides = [
+  "https://images.unsplash.com/photo-1765468290589-17d332ddbd4b?w=1920&q=80",
   "https://images.unsplash.com/photo-1755448670661-0b6c179d2b26?w=1920&q=80",
-  "https://images.unsplash.com/photo-1641618640134-fd5a58f1d225?w=1920&q=80",
   "https://images.unsplash.com/photo-1556337074-c1a5a6559f12?w=1920&q=80",
   "https://images.unsplash.com/photo-1682623764612-4e942b7c8119?w=1920&q=80",
 ];
 
 const captions = [
-  "Service at Sea",
-  "One Nation, One Heritage",
+  "Honor and Service",
+  "Strength at Sea",
   "Roots in the Mountains",
   "Forged in Service",
 ];

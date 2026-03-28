@@ -66,36 +66,39 @@ export default function AboutPage() {
           </div>
           <div>
             <p className="text-xs font-medium uppercase tracking-[0.3em] text-[#C8A84E]">
-              Our Heritage
+              The Founder
             </p>
             <h2 className="mt-4 text-3xl font-bold md:text-4xl">
-              Rooted in <span className="text-[#C8A84E]">Service</span>
+              Nestor <span className="text-[#C8A84E]">Cuevas Soto</span>
             </h2>
             <div className="mt-3 h-px w-16 bg-[#C8A84E]/40" />
-            <p className="mt-6 leading-relaxed text-[#A3A3A3]">
-              Goats Heritage is a veteran-owned company born from a commitment to excellence, discipline, and brotherhood. Our roots run deep — from service to our country to the fertile lands of Nicaragua where our cigars are handcrafted.
-            </p>
-            <p className="mt-4 leading-relaxed text-[#A3A3A3]">
-              Every cigar we produce carries the spirit of those who came before us — the guardians of tradition, the builders of legacy, and the leaders who paved the way.
-            </p>
-            <ul className="mt-6 space-y-3 text-sm text-[#A3A3A3]">
-              <li className="flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#C8A84E]" />
-                Veteran-owned and operated
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#C8A84E]" />
-                Handcrafted in Nicaragua
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#C8A84E]" />
-                Premium tobacco from the highlands of Esteli
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#C8A84E]" />
-                A legacy of honor, craft, and community
-              </li>
-            </ul>
+            <div className="mt-6 space-y-4 leading-relaxed text-[#A3A3A3]">
+              <p>Every journey has a beginning.</p>
+              <p>
+                A kid from Lares, Puerto Rico took a leap of faith and joined the world's strongest Navy, stepping into the unknown and leaving everything familiar behind.
+              </p>
+              <p>
+                Through the years, one thing remained constant: mentorship, leadership, and guidance. The kind that shapes you, molds you, and pushes you to become better than you ever thought possible.
+              </p>
+              <p>
+                In what felt like the blink of an eye, 20 years passed. A career built on discipline, sacrifice, and growth came full circle, and a new chapter began.
+              </p>
+              <p className="font-medium text-[#F5F5F5]">
+                My name is Nestor Cuevas Soto. I am the product of a life shaped by great people, mentors who believed in me before I believed in myself.
+              </p>
+              <p>
+                Goats Heritage is my way of paying that forward.
+              </p>
+              <p>
+                Transitioning from the military comes with a cost, identity, purpose, direction. But those things are not lost, they are rebuilt from within.
+              </p>
+              <p>
+                Goats Heritage is more than a brand. It is a reflection of that journey. A culture built for those striving to become their best. For those who were guided, and now lead.
+              </p>
+              <p className="mt-2 text-lg font-semibold text-[#C8A84E]">
+                I am Goats Heritage.
+              </p>
+            </div>
           </div>
         </div>
       </section>
