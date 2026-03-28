@@ -7,14 +7,12 @@ const slides = [
   "https://images.unsplash.com/photo-1765468290589-17d332ddbd4b?w=1920&q=80",
   "/images/ddg.jpeg",
   "https://images.unsplash.com/photo-1556337074-c1a5a6559f12?w=1920&q=80",
-  "https://images.unsplash.com/photo-1682623764612-4e942b7c8119?w=1920&q=80",
 ];
 
 const captions = [
   "Honor and Service",
   "Strength at Sea",
   "Roots in the Mountains",
-  "Forged in Service",
 ];
 
 export default function HeritageCarousel() {
