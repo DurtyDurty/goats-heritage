@@ -119,12 +119,18 @@ export default function AdminNewsletterPage() {
       </div>
 
       {/* Stats */}
-      <div className="mt-4 flex gap-4">
+      <div className="mt-4 flex flex-wrap gap-3">
         <div className="rounded-lg bg-[#C8A84E]/10 px-4 py-2 text-sm font-medium text-[#C8A84E]">
-          {total} Total
+          {total} Total Reach
         </div>
         <div className="rounded-lg bg-[#22C55E]/10 px-4 py-2 text-sm font-medium text-[#22C55E]">
           {active} Active
+        </div>
+        <div className="rounded-lg bg-[#3B82F6]/10 px-4 py-2 text-sm font-medium text-[#3B82F6]">
+          {subscribers.filter(s => s.source === "account").length} From Accounts
+        </div>
+        <div className="rounded-lg bg-[#8B5CF6]/10 px-4 py-2 text-sm font-medium text-[#8B5CF6]">
+          {subscribers.filter(s => s.source !== "account").length} From Newsletter
         </div>
       </div>
 

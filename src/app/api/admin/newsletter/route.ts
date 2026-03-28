@@ -10,15 +10,43 @@ export async function GET() {
   if (!admin) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const supabase = createAdminClient();
-  const { data, error } = await supabase
+
+  // Get newsletter subscribers
+  const { data: newsletters } = await supabase
     .from("newsletter_subscribers")
     .select("*")
     .order("created_at", { ascending: false });
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  // Get registered customers with emails
+  const { data: profiles } = await supabase
+    .from("profiles")
+    .select("id, email, full_name, created_at")
+    .order("created_at", { ascending: false });
 
-  const total = data?.length || 0;
-  const active = data?.filter((s: any) => s.subscribed).length || 0;
+  // Build newsletter list with source labels
+  const newsletterEmails = new Set((newsletters || []).map((n: any) => n.email?.toLowerCase()));
 
-  return NextResponse.json({ subscribers: data, total, active });
+  // Add registered customers who aren't already newsletter subscribers
+  const customerEntries = (profiles || [])
+    .filter((p: any) => p.email && !newsletterEmails.has(p.email.toLowerCase()))
+    .map((p: any) => ({
+      id: p.id,
+      email: p.email,
+      full_name: p.full_name,
+      source: "account",
+      subscribed: true,
+      created_at: p.created_at,
+    }));
+
+  const combined = [
+    ...(newsletters || []),
+    ...customerEntries,
+  ].sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+  const total = combined.length;
+  const active = combined.filter((s: any) => s.subscribed).length;
+  const fromNewsletter = (newsletters || []).length;
+  const fromAccounts = customerEntries.length;
+
+  return NextResponse.json({ subscribers: combined, total, active, fromNewsletter, fromAccounts });
 }
