@@ -199,7 +199,7 @@ export default function ContactPage() {
                       >
                         Message
                       </label>
-                      <textarea
+                      <textarea spellCheck={true}
                         id="message"
                         rows={4}
                         required

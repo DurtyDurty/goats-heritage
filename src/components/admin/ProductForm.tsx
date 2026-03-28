@@ -190,7 +190,7 @@ export default function ProductForm({ product, open, onClose, onSaved }: Props) 
 
           <div>
             <label className="mb-1 block text-xs text-[#A3A3A3]">Description</label>
-            <textarea
+            <textarea spellCheck={true}
               rows={3}
               value={form.description}
               onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
@@ -311,7 +311,7 @@ export default function ProductForm({ product, open, onClose, onSaved }: Props) 
             <label className="mb-1 block text-xs text-[#A3A3A3]">
               Metadata (JSON)
             </label>
-            <textarea
+            <textarea spellCheck={true}
               rows={4}
               value={metadataText}
               onChange={(e) => setMetadataText(e.target.value)}

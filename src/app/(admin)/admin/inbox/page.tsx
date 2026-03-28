@@ -374,7 +374,7 @@ export default function AdminInboxPage() {
                       <label className="mb-2 block text-sm font-medium text-[#A3A3A3]">
                         Reply
                       </label>
-                      <textarea
+                      <textarea spellCheck={true}
                         rows={4}
                         value={replyText}
                         onChange={(e) => setReplyText(e.target.value)}
@@ -466,7 +466,7 @@ export default function AdminInboxPage() {
               <label className="mb-1.5 block text-sm font-medium text-[#A3A3A3]">
                 Message
               </label>
-              <textarea
+              <textarea spellCheck={true}
                 rows={6}
                 value={composeMessage}
                 onChange={(e) => setComposeMessage(e.target.value)}

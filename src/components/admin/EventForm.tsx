@@ -112,7 +112,7 @@ export default function EventForm({ event, open, onClose, onSaved }: Props) {
 
           <div>
             <label className="mb-1 block text-xs text-[#A3A3A3]">Description</label>
-            <textarea
+            <textarea spellCheck={true}
               rows={3}
               value={form.description}
               onChange={(e) =>

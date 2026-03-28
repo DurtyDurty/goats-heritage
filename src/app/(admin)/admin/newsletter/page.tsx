@@ -208,7 +208,7 @@ export default function AdminNewsletterPage() {
               </div>
               <div>
                 <label className="mb-1 block text-xs text-[#A3A3A3]">Message</label>
-                <textarea
+                <textarea spellCheck={true}
                   rows={6}
                   value={broadcastMessage}
                   onChange={(e) => setBroadcastMessage(e.target.value)}
