@@ -33,6 +33,7 @@ export async function GET() {
 
       return {
         ...profile,
+        type: "customer" as const,
         orders: orders || [],
         order_count: orders?.length || 0,
         total_spent: totalSpent,
@@ -40,5 +41,38 @@ export async function GET() {
     })
   );
 
-  return NextResponse.json({ customers: customersWithOrders });
+  // Fetch newsletter subscribers
+  const { data: subscribers } = await supabase
+    .from("newsletter_subscribers")
+    .select("id, email, full_name, source, subscribed, created_at")
+    .order("created_at", { ascending: false });
+
+  // Build set of existing customer emails for dedup
+  const customerEmails = new Set(
+    (profiles || []).map((p: any) => p.email?.toLowerCase())
+  );
+
+  // Create lead entries for newsletter-only subscribers
+  const leads = (subscribers || [])
+    .filter((s: any) => !customerEmails.has(s.email?.toLowerCase()))
+    .map((s: any) => ({
+      id: s.id,
+      full_name: s.full_name || null,
+      email: s.email,
+      phone: null,
+      date_of_birth: null,
+      age_verified: false,
+      role: "lead",
+      created_at: s.created_at,
+      type: "lead" as const,
+      source: s.source,
+      subscribed: s.subscribed,
+      orders: [],
+      order_count: 0,
+      total_spent: 0,
+    }));
+
+  const combined = [...customersWithOrders, ...leads];
+
+  return NextResponse.json({ customers: combined });
 }

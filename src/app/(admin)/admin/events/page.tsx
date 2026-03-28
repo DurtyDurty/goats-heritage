@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus } from "lucide-react";
+import { Plus, Bell } from "lucide-react";
 import EventForm from "@/components/admin/EventForm";
 
 interface Event {
@@ -21,6 +21,8 @@ export default function AdminEventsPage() {
   const [loading, setLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
   const [editEvent, setEditEvent] = useState<any>(null);
+  const [notifying, setNotifying] = useState<string | null>(null);
+  const [notifyResult, setNotifyResult] = useState<{ id: string; message: string; success: boolean } | null>(null);
 
   async function fetchEvents() {
     const res = await fetch("/api/admin/events");
@@ -41,6 +43,26 @@ export default function AdminEventsPage() {
       body: JSON.stringify({ id }),
     });
     fetchEvents();
+  }
+
+  async function handleNotify(id: string, title: string) {
+    if (!confirm(`Send event notification for "${title}" to all subscribers and customers?`)) return;
+    setNotifying(id);
+    setNotifyResult(null);
+
+    try {
+      const res = await fetch("/api/admin/events/notify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ eventId: id }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setNotifyResult({ id, message: `Sent to ${data.sent} recipients`, success: true });
+    } catch (err: any) {
+      setNotifyResult({ id, message: err.message || "Failed to send", success: false });
+    }
+    setNotifying(null);
   }
 
   return (
@@ -99,7 +121,7 @@ export default function AdminEventsPage() {
                     })}
                   </td>
                   <td className="px-4 py-3 text-[#A3A3A3]">
-                    {e.location || "—"}
+                    {e.location || "\u2014"}
                   </td>
                   <td className="px-4 py-3 text-[#A3A3A3]">
                     {e.capacity || "Unlimited"}
@@ -113,7 +135,7 @@ export default function AdminEventsPage() {
                     )}
                   </td>
                   <td className="px-4 py-3">
-                    <div className="flex gap-2">
+                    <div className="flex items-center gap-2">
                       <button
                         onClick={() => {
                           setEditEvent(e);
@@ -129,7 +151,24 @@ export default function AdminEventsPage() {
                       >
                         Delete
                       </button>
+                      <button
+                        onClick={() => handleNotify(e.id, e.title)}
+                        disabled={notifying === e.id}
+                        className="flex items-center gap-1 rounded bg-[#3B82F6]/10 px-2 py-1 text-xs font-medium text-[#3B82F6] hover:bg-[#3B82F6]/20 disabled:opacity-50"
+                      >
+                        <Bell className="h-3 w-3" />
+                        {notifying === e.id ? "Sending..." : "Notify All"}
+                      </button>
                     </div>
+                    {notifyResult && notifyResult.id === e.id && (
+                      <p
+                        className={`mt-1 text-xs ${
+                          notifyResult.success ? "text-[#22C55E]" : "text-[#EF4444]"
+                        }`}
+                      >
+                        {notifyResult.message}
+                      </p>
+                    )}
                   </td>
                 </tr>
               ))

@@ -14,6 +14,9 @@ interface Customer {
   created_at: string;
   order_count: number;
   total_spent: number;
+  type: "customer" | "lead";
+  source?: string;
+  subscribed?: boolean;
   orders: {
     id: string;
     total_cents: number;
@@ -21,6 +24,8 @@ interface Customer {
     created_at: string;
   }[];
 }
+
+type FilterTab = "all" | "customers" | "leads";
 
 const statusColors: Record<string, string> = {
   pending: "bg-[#F59E0B]/10 text-[#F59E0B]",
@@ -35,6 +40,7 @@ export default function AdminCustomersPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Customer | null>(null);
+  const [filterTab, setFilterTab] = useState<FilterTab>("all");
 
   useEffect(() => {
     async function load() {
@@ -46,14 +52,22 @@ export default function AdminCustomersPage() {
     load();
   }, []);
 
-  const filtered = customers.filter(
-    (c) =>
+  const filtered = customers.filter((c) => {
+    const matchesSearch =
       (c.full_name || "").toLowerCase().includes(search.toLowerCase()) ||
-      c.email.toLowerCase().includes(search.toLowerCase())
-  );
+      c.email.toLowerCase().includes(search.toLowerCase());
+    const matchesTab =
+      filterTab === "all" ||
+      (filterTab === "customers" && c.type === "customer") ||
+      (filterTab === "leads" && c.type === "lead");
+    return matchesSearch && matchesTab;
+  });
+
+  const customerCount = customers.filter((c) => c.type === "customer").length;
+  const leadCount = customers.filter((c) => c.type === "lead").length;
 
   function formatDob(dob: string | null) {
-    if (!dob) return "—";
+    if (!dob) return "\u2014";
     return new Date(dob + "T00:00:00").toLocaleDateString("en-US", {
       month: "long",
       day: "numeric",
@@ -62,7 +76,7 @@ export default function AdminCustomersPage() {
   }
 
   function calculateAge(dob: string | null) {
-    if (!dob) return "—";
+    if (!dob) return "\u2014";
     const birth = new Date(dob);
     const today = new Date();
     let age = today.getFullYear() - birth.getFullYear();
@@ -73,10 +87,10 @@ export default function AdminCustomersPage() {
 
   function exportCSV() {
     const csv = [
-      "Name,Email,Phone,DOB,Age,Age Verified,Role,Orders,Total Spent,Joined",
+      "Type,Name,Email,Phone,DOB,Age,Age Verified,Role,Orders,Total Spent,Source,Joined",
       ...customers.map(
         (c) =>
-          `"${c.full_name || ""}",${c.email},${c.phone || ""},${c.date_of_birth || ""},${calculateAge(c.date_of_birth)},${c.age_verified},${c.role},${c.order_count},$${(c.total_spent / 100).toFixed(2)},${new Date(c.created_at).toLocaleDateString()}`
+          `${c.type},"${c.full_name || ""}",${c.email},${c.phone || ""},${c.date_of_birth || ""},${calculateAge(c.date_of_birth)},${c.age_verified},${c.role},${c.order_count},$${(c.total_spent / 100).toFixed(2)},${c.source || ""},${new Date(c.created_at).toLocaleDateString()}`
       ),
     ].join("\n");
 
@@ -87,6 +101,12 @@ export default function AdminCustomersPage() {
     a.download = `goats-heritage-customers-${new Date().toISOString().split("T")[0]}.csv`;
     a.click();
   }
+
+  const tabs: { key: FilterTab; label: string }[] = [
+    { key: "all", label: "All" },
+    { key: "customers", label: "Customers" },
+    { key: "leads", label: "Leads" },
+  ];
 
   return (
     <div>
@@ -108,11 +128,31 @@ export default function AdminCustomersPage() {
           {customers.length} Total
         </div>
         <div className="rounded-lg bg-[#22C55E]/10 px-4 py-2 text-sm font-medium text-[#22C55E]">
-          {customers.filter((c) => c.age_verified).length} Age Verified
+          {customerCount} Customers
         </div>
         <div className="rounded-lg bg-[#3B82F6]/10 px-4 py-2 text-sm font-medium text-[#3B82F6]">
+          {leadCount} Leads
+        </div>
+        <div className="rounded-lg bg-[#F59E0B]/10 px-4 py-2 text-sm font-medium text-[#F59E0B]">
           {customers.filter((c) => c.order_count > 0).length} With Orders
         </div>
+      </div>
+
+      {/* Filter Tabs */}
+      <div className="mt-4 flex gap-1 rounded-lg bg-[#1A1A1A] p-1">
+        {tabs.map((tab) => (
+          <button
+            key={tab.key}
+            onClick={() => setFilterTab(tab.key)}
+            className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${
+              filterTab === tab.key
+                ? "bg-[#262626] text-[#F5F5F5]"
+                : "text-[#A3A3A3] hover:text-[#F5F5F5]"
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
 
       {/* Search */}
@@ -132,6 +172,7 @@ export default function AdminCustomersPage() {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-[#262626] text-left text-[#A3A3A3]">
+              <th className="px-4 py-3 font-medium">Type</th>
               <th className="px-4 py-3 font-medium">Name</th>
               <th className="px-4 py-3 font-medium">Email</th>
               <th className="px-4 py-3 font-medium">DOB</th>
@@ -139,7 +180,6 @@ export default function AdminCustomersPage() {
               <th className="px-4 py-3 font-medium">Verified</th>
               <th className="px-4 py-3 font-medium">Orders</th>
               <th className="px-4 py-3 font-medium">Spent</th>
-              <th className="px-4 py-3 font-medium">Role</th>
               <th className="px-4 py-3 font-medium">Joined</th>
             </tr>
           </thead>
@@ -159,22 +199,32 @@ export default function AdminCustomersPage() {
                   className="cursor-pointer transition-colors hover:bg-[#1A1A1A]"
                   onClick={() => setSelected(selected?.id === c.id ? null : c)}
                 >
-                  <td className="px-4 py-3 font-medium text-[#F5F5F5]">{c.full_name || "—"}</td>
+                  <td className="px-4 py-3">
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                        c.type === "customer"
+                          ? "bg-[#22C55E]/10 text-[#22C55E]"
+                          : "bg-[#3B82F6]/10 text-[#3B82F6]"
+                      }`}
+                    >
+                      {c.type === "customer" ? "Customer" : "Lead"}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 font-medium text-[#F5F5F5]">{c.full_name || "\u2014"}</td>
                   <td className="px-4 py-3 text-[#A3A3A3]">{c.email}</td>
                   <td className="px-4 py-3 text-[#A3A3A3]">{formatDob(c.date_of_birth)}</td>
                   <td className="px-4 py-3 text-[#A3A3A3]">{calculateAge(c.date_of_birth)}</td>
                   <td className="px-4 py-3">
-                    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${c.age_verified ? "bg-[#22C55E]/10 text-[#22C55E]" : "bg-[#F59E0B]/10 text-[#F59E0B]"}`}>
-                      {c.age_verified ? "Yes" : "No"}
-                    </span>
+                    {c.type === "customer" ? (
+                      <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${c.age_verified ? "bg-[#22C55E]/10 text-[#22C55E]" : "bg-[#F59E0B]/10 text-[#F59E0B]"}`}>
+                        {c.age_verified ? "Yes" : "No"}
+                      </span>
+                    ) : (
+                      <span className="text-[#A3A3A3]">{"\u2014"}</span>
+                    )}
                   </td>
                   <td className="px-4 py-3 text-[#F5F5F5]">{c.order_count}</td>
                   <td className="px-4 py-3 text-[#F5F5F5]">${(c.total_spent / 100).toFixed(2)}</td>
-                  <td className="px-4 py-3">
-                    <span className={`rounded-full px-2 py-0.5 text-xs font-medium capitalize ${c.role === "admin" ? "bg-[#C8A84E]/10 text-[#C8A84E]" : c.role === "member" ? "bg-[#22C55E]/10 text-[#22C55E]" : "bg-[#262626] text-[#A3A3A3]"}`}>
-                      {c.role}
-                    </span>
-                  </td>
                   <td className="px-4 py-3 text-[#A3A3A3]">{new Date(c.created_at).toLocaleDateString()}</td>
                 </tr>
               ))
