@@ -46,13 +46,13 @@ export default function AboutPage() {
           </div>
           <div className="mt-10 space-y-6 text-center text-lg leading-relaxed text-[#A3A3A3]">
             <p>
-              Goats Heritage exists to build something greater than a brand — a culture rooted in purpose.
+              Goats Heritage exists to build something greater than a brand, a culture rooted in purpose.
             </p>
             <p>
               It is for those committed to becoming the best version of themselves, for those who were guided and now lead others forward.
             </p>
             <p className="font-medium text-[#F5F5F5]">
-              Built with purpose, driven by legacy — to honor, to build, and to lead.
+              Built with purpose, driven by legacy, to honor, to build, and to lead.
             </p>
           </div>
         </div>
@@ -115,7 +115,7 @@ export default function AboutPage() {
           <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {[
               { title: "Honor", description: "We honor those who served, those who sacrificed, and those who built the foundation we stand on today." },
-              { title: "Legacy", description: "Every product we create is a tribute to the traditions passed down through generations — from the tobacco fields to your hands." },
+              { title: "Legacy", description: "Every product we create is a tribute to the traditions passed down through generations, from the tobacco fields to your hands." },
               { title: "Community", description: "We believe in building a brotherhood of like-minded individuals who elevate each other and celebrate the culture together." },
             ].map((value) => (
               <div
