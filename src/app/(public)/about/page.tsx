@@ -1,9 +1,10 @@
 import Image from "next/image";
 import type { Metadata } from "next";
+import HeritageCarousel from "@/components/about/HeritageCarousel";
 
 export const metadata: Metadata = {
-  title: "About | Goats Heritage",
-  description: "The story behind Goats Heritage — premium cigars and lifestyle.",
+  title: "About | Goats Heritage\u2122",
+  description: "The story behind Goats Heritage \u2014 premium cigars and lifestyle. Built with purpose, driven by legacy.",
 };
 
 export default function AboutPage() {
@@ -39,43 +40,62 @@ export default function AboutPage() {
               Our Mission
             </p>
             <h2 className="mt-4 text-3xl font-bold md:text-4xl">
-              Elevating <span className="text-[#C8A84E]">Tradition</span>
+              Built with <span className="text-[#C8A84E]">Purpose</span>
             </h2>
             <div className="mx-auto mt-3 h-px w-16 bg-[#C8A84E]/40" />
           </div>
-          <p className="mt-8 text-center leading-relaxed text-[#A3A3A3]">
-            {/* TODO: Add mission statement */}
-            Coming soon.
-          </p>
+          <div className="mt-10 space-y-6 text-center text-lg leading-relaxed text-[#A3A3A3]">
+            <p>
+              Goats Heritage exists to build something greater than a brand — a culture rooted in purpose.
+            </p>
+            <p>
+              It is for those committed to becoming the best version of themselves, for those who were guided and now lead others forward.
+            </p>
+            <p className="font-medium text-[#F5F5F5]">
+              Built with purpose, driven by legacy — to honor, to build, and to lead.
+            </p>
+          </div>
         </div>
       </section>
 
-      {/* Founder */}
+      {/* Heritage / Patriotic Carousel */}
       <section className="bg-[#141414] py-24">
         <div className="mx-auto grid max-w-7xl gap-12 px-4 sm:px-6 lg:grid-cols-2 lg:items-center lg:px-8">
           <div className="flex items-center justify-center">
-            <div className="relative aspect-[3/4] w-full max-w-sm overflow-hidden rounded-xl border border-[#C8A84E]/20">
-              <Image
-                src="https://images.unsplash.com/photo-1633526543814-9718c8922b7a?w=800&q=80"
-                alt="Tobacco heritage"
-                fill
-                className="object-cover brightness-75"
-              />
-            </div>
+            <HeritageCarousel />
           </div>
           <div>
             <p className="text-xs font-medium uppercase tracking-[0.3em] text-[#C8A84E]">
-              The Founder
+              Our Heritage
             </p>
             <h2 className="mt-4 text-3xl font-bold md:text-4xl">
-              {/* TODO: Add founder name */}
-              <span className="text-[#C8A84E]">Coming Soon</span>
+              Rooted in <span className="text-[#C8A84E]">Service</span>
             </h2>
             <div className="mt-3 h-px w-16 bg-[#C8A84E]/40" />
             <p className="mt-6 leading-relaxed text-[#A3A3A3]">
-              {/* TODO: Add founder bio */}
-              Founder bio coming soon.
+              Goats Heritage is a veteran-owned company born from a commitment to excellence, discipline, and brotherhood. Our roots run deep — from service to our country to the fertile lands of Nicaragua where our cigars are handcrafted.
             </p>
+            <p className="mt-4 leading-relaxed text-[#A3A3A3]">
+              Every cigar we produce carries the spirit of those who came before us — the guardians of tradition, the builders of legacy, and the leaders who paved the way.
+            </p>
+            <ul className="mt-6 space-y-3 text-sm text-[#A3A3A3]">
+              <li className="flex items-center gap-2">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#C8A84E]" />
+                Veteran-owned and operated
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#C8A84E]" />
+                Handcrafted in Nicaragua
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#C8A84E]" />
+                Premium tobacco from the highlands of Esteli
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#C8A84E]" />
+                A legacy of honor, craft, and community
+              </li>
+            </ul>
           </div>
         </div>
       </section>
@@ -91,9 +111,9 @@ export default function AboutPage() {
           </div>
           <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {[
-              { title: "Craft", description: "TODO: Add description" },
-              { title: "Culture", description: "TODO: Add description" },
-              { title: "Community", description: "TODO: Add description" },
+              { title: "Honor", description: "We honor those who served, those who sacrificed, and those who built the foundation we stand on today." },
+              { title: "Legacy", description: "Every product we create is a tribute to the traditions passed down through generations — from the tobacco fields to your hands." },
+              { title: "Community", description: "We believe in building a brotherhood of like-minded individuals who elevate each other and celebrate the culture together." },
             ].map((value) => (
               <div
                 key={value.title}
