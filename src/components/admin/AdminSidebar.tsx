@@ -42,7 +42,7 @@ export default function AdminSidebar({ onNavigate }: { onNavigate?: () => void }
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 space-y-1 px-3 py-4">
+      <nav className="flex-1 overflow-y-auto space-y-1 px-3 py-4">
         {navItems.map((item) => {
           const isActive =
             pathname === item.href ||
