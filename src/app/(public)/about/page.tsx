@@ -1,4 +1,3 @@
-import Image from "next/image";
 import type { Metadata } from "next";
 import HeritageCarousel from "@/components/about/HeritageCarousel";
 
@@ -10,9 +9,7 @@ export const metadata: Metadata = {
 export default function AboutPage() {
   return (
     <div>
-      <section className="relative flex items-center justify-center overflow-hidden py-32">
-        <Image src="https://images.unsplash.com/photo-1633526544668-c4f2e3c8d999?w=1920&q=80" alt="" fill className="object-cover brightness-[0.15]" priority />
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#0A0A0A]/60 via-transparent to-[#0A0A0A]" />
+      <section className="relative flex items-center justify-center overflow-hidden bg-[#0A0A0A] py-32">
         <div className="relative z-10 px-4 text-center">
           <img src="/images/logo.png" alt="" className="mx-auto h-32 w-auto" />
           <h1 className="mt-8 text-5xl font-bold leading-tight md:text-7xl">Our <span className="text-[#C8A84E]">Story</span></h1>
