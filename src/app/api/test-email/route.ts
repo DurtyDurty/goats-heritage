@@ -1,4 +1,3 @@
-// Test endpoint removed
 export async function GET() {
-  return new Response("Not available", { status: 404 });
+  return new Response("Not found", { status: 404 });
 }

@@ -25,7 +25,9 @@
       "Bash(ls \"/c/Users/durty/Goats Heritage/src/app/\\(public\\)/checkout\")",
       "WebFetch(domain:tutorials.sitecast.com)",
       "Bash(ls \"c:/Users/durty/Goats Heritage/src/app/\\(admin\\)/admin/\")",
-      "Bash(ls \"c:/Users/durty/Goats Heritage/src/app/\\(public\\)/\")"
+      "Bash(ls \"c:/Users/durty/Goats Heritage/src/app/\\(public\\)/\")",
+      "Bash(npx tsc:*)",
+      "Bash(npx next:*)"
     ]
   }
 }
