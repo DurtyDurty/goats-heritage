@@ -3,8 +3,8 @@ import type { Metadata } from "next";
 import HeritageCarousel from "@/components/about/HeritageCarousel";
 
 export const metadata: Metadata = {
-  title: "About | Goats Heritage\u2122",
-  description: "The story behind Goats Heritage \u2014 premium cigars and lifestyle. Built with purpose, driven by legacy.",
+  title: "About | Goats Heritage",
+  description: "The story behind Goats Heritage, premium cigars and lifestyle. Built with purpose, driven by legacy.",
 };
 
 export default function AboutPage() {
