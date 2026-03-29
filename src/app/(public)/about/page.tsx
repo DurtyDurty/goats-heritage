@@ -23,9 +23,7 @@ export default function AboutPage() {
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(200,168,78,0.06)_0%,_transparent_70%)]" />
         <div className="relative z-10 px-4 text-center">
           <Image src="/images/logo.png" alt="Goats Heritage" width={200} height={100} className="mx-auto h-32 w-auto" />
-          <h1 className="mt-8 text-5xl font-bold leading-tight md:text-7xl">
-            Our <span className="text-[#C8A84E]">Story</span>
-          </h1>
+          <h1 className="mt-8 text-5xl font-bold leading-tight md:text-7xl">Our <span className="text-[#C8A84E]">Story</span></h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-[#A3A3A3]">
             More than cigars. A heritage built on craft, culture, and community.
           </p>
