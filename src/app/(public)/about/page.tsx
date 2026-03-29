@@ -10,23 +10,13 @@ export const metadata: Metadata = {
 export default function AboutPage() {
   return (
     <>
-      {/* Hero */}
       <section className="relative flex items-center justify-center overflow-hidden py-32">
-        <Image
-          src="https://images.unsplash.com/photo-1633526544668-c4f2e3c8d999?w=1920&q=80"
-          alt=""
-          fill
-          className="object-cover brightness-[0.15]"
-          priority
-        />
+        <Image src="https://images.unsplash.com/photo-1633526544668-c4f2e3c8d999?w=1920&q=80" alt="" fill className="object-cover brightness-[0.15]" priority />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#0A0A0A]/60 via-transparent to-[#0A0A0A]" />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(200,168,78,0.06)_0%,_transparent_70%)]" />
         <div className="relative z-10 px-4 text-center">
-          <Image src="/images/logo.png" alt="Goats Heritage" width={200} height={100} className="mx-auto h-32 w-auto" />
+          <Image src="/images/logo.png" alt="" width={200} height={100} className="mx-auto h-32 w-auto" />
           <h1 className="mt-8 text-5xl font-bold leading-tight md:text-7xl">Our <span className="text-[#C8A84E]">Story</span></h1>
-          <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-[#A3A3A3]">
-            More than cigars. A heritage built on craft, culture, and community.
-          </p>
+          <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-[#A3A3A3]">More than cigars. A heritage built on craft, culture, and community.</p>
         </div>
       </section>
 
