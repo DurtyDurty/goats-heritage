@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { MapPin, Users } from "lucide-react";
+import { MapPin, Users, ExternalLink } from "lucide-react";
 import RsvpButton from "./RsvpButton";
 
 interface EventCardProps {
@@ -13,6 +13,7 @@ interface EventCardProps {
     capacity: number | null;
     is_members_only: boolean;
     image_url: string | null;
+    event_link: string | null;
     rsvp_count: number;
   };
 }
@@ -78,6 +79,18 @@ export default function EventCard({ event }: EventCardProps) {
             <MapPin className="h-3.5 w-3.5" />
             {event.location}
           </div>
+        )}
+
+        {event.event_link && (
+          <a
+            href={event.event_link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-2 flex items-center gap-1.5 text-sm text-[#C8A84E] transition-colors hover:text-[#E8D48B]"
+          >
+            <ExternalLink className="h-3.5 w-3.5" />
+            Event Details
+          </a>
         )}
 
         {event.capacity !== null && (
