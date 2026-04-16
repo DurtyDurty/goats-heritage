@@ -12,6 +12,7 @@ interface EventData {
   capacity: number | null;
   is_members_only: boolean;
   image_url: string;
+  event_link?: string;
 }
 
 const emptyEvent: EventData = {
@@ -22,6 +23,7 @@ const emptyEvent: EventData = {
   capacity: null,
   is_members_only: false,
   image_url: "",
+  event_link: "",
 };
 
 interface Props {
@@ -86,6 +88,7 @@ export default function EventForm({ event, open, onClose, onSaved }: Props) {
       event_date: new Date(form.event_date).toISOString(),
       capacity: form.capacity || null,
       image_url: form.image_url || null,
+      event_link: form.event_link || null,
     };
 
     try {
@@ -226,15 +229,17 @@ export default function EventForm({ event, open, onClose, onSaved }: Props) {
               }}
             />
 
-            {/* Or paste URL */}
-            <div className="mt-2">
-              <input
-                value={form.image_url}
-                onChange={(e) => setForm((f) => ({ ...f, image_url: e.target.value }))}
-                placeholder="Or paste image URL..."
-                className={`${inputClass} text-xs`}
-              />
-            </div>
+          </div>
+
+          <div>
+            <label className="mb-1 block text-xs text-[#A3A3A3]">Event Link (optional)</label>
+            <input
+              value={form.event_link || ""}
+              onChange={(e) => setForm((f) => ({ ...f, event_link: e.target.value }))}
+              placeholder="Link to external event page, Facebook event, etc."
+              className={inputClass}
+            />
+            <p className="mt-1 text-[10px] text-[#A3A3A3]/60">Add a link if this event is hosted by or connected to another organization</p>
           </div>
 
           <label className="flex items-center gap-2 text-sm text-[#A3A3A3]">

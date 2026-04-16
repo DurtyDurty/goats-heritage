@@ -48,6 +48,7 @@ export async function POST(request: Request) {
       capacity: body.capacity || null,
       is_members_only: body.is_members_only ?? false,
       image_url: body.image_url || null,
+      event_link: body.event_link || null,
     })
     .select()
     .single();
@@ -73,6 +74,7 @@ export async function PUT(request: Request) {
       capacity: body.capacity || null,
       is_members_only: body.is_members_only ?? false,
       image_url: body.image_url || null,
+      event_link: body.event_link || null,
     })
     .eq("id", body.id)
     .select()
