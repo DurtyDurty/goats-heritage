@@ -81,10 +81,10 @@ export default function ExperienceSlideshow({ events }: { events: Event[] }) {
             key={event.id}
             className={`transition-opacity duration-700 ${active === slideIndex ? "opacity-100" : "pointer-events-none absolute inset-0 opacity-0"}`}
           >
-            <div className="mx-auto max-w-2xl">
+            <div className="mx-auto max-w-md sm:max-w-lg">
               <div className="overflow-hidden rounded-xl border border-[#262626] bg-[#141414]">
                 {event.image_url && (
-                  <div className="relative">
+                  <div className="relative overflow-hidden">
                     <img src={event.image_url} alt={event.title} className="w-full" />
                     {event.is_members_only && (
                       <span className="absolute left-3 top-3 rounded-md bg-[#C8A84E] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-black">Members Only</span>
