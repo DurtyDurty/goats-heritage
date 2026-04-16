@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { Metadata } from "next";
-import { MapPin, Calendar, Users } from "lucide-react";
+import { MapPin, Calendar, Users, ExternalLink } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import RsvpButton from "@/components/events/RsvpButton";
 
@@ -123,6 +123,18 @@ export default async function EventDetailPage({ params }: Props) {
                     <MapPin className="h-5 w-5 text-[#C8A84E]" />
                     <span>{event.location}</span>
                   </div>
+                )}
+
+                {event.event_link && (
+                  <a
+                    href={event.event_link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 text-[#C8A84E] transition-colors hover:text-[#E8D48B]"
+                  >
+                    <ExternalLink className="h-5 w-5" />
+                    <span>View Event Details</span>
+                  </a>
                 )}
 
                 <div className="flex items-center gap-3 text-[#A3A3A3]">
