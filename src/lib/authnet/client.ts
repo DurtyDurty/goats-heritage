@@ -9,7 +9,7 @@ export function getMerchantAuth() {
 }
 
 export function isProduction() {
-  return process.env.AUTHNET_ENVIRONMENT === "production";
+  return process.env.NEXT_PUBLIC_AUTHNET_ENVIRONMENT === "production";
 }
 
 export { ApiContracts, AuthorizeNet };

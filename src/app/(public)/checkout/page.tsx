@@ -65,7 +65,10 @@ export default function CheckoutPage() {
     if (document.getElementById("accept-js-script")) return;
     const script = document.createElement("script");
     script.id = "accept-js-script";
-    script.src = "https://jstest.authorize.net/v1/Accept.js";
+    script.src =
+      process.env.NEXT_PUBLIC_AUTHNET_ENVIRONMENT === "production"
+        ? "https://js.authorize.net/v1/Accept.js"
+        : "https://jstest.authorize.net/v1/Accept.js";
     script.charset = "utf-8";
     document.head.appendChild(script);
   }, []);
