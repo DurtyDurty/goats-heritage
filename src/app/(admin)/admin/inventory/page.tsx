@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Package, AlertTriangle, XCircle, DollarSign, Search, Plus, X, Pencil, Trash2 } from "lucide-react";
+import { Package, AlertTriangle, XCircle, DollarSign, TrendingUp, Search, Plus, X, Pencil, Trash2 } from "lucide-react";
 
 interface Product {
   id: string;
@@ -33,6 +33,43 @@ interface Movement {
   products: { name: string };
 }
 
+interface ProductFinancials {
+  id: string;
+  name: string;
+  category: string;
+  stock: number;
+  stockCost: number;
+  stockRetail: number;
+  unitsSold: number;
+  revenue: number;
+  cogs: number;
+  profit: number;
+}
+
+interface Financials {
+  shelf: { cost: number; retail: number };
+  sold: { revenue: number; cogs: number; units: number };
+  products: ProductFinancials[];
+}
+
+const emptyFinancials: Financials = {
+  shelf: { cost: 0, retail: 0 },
+  sold: { revenue: 0, cogs: 0, units: 0 },
+  products: [],
+};
+
+// Validated against the #141414 surface for contrast and color-vision separation
+const SOLD_COLOR = "#B08A32";
+const SHELF_COLOR = "#3B82F6";
+
+function money(cents: number): string {
+  return (cents / 100).toLocaleString("en-US", { style: "currency", currency: "USD" });
+}
+
+function pct(part: number, whole: number): string {
+  return whole > 0 ? `${Math.round((part / whole) * 100)}%` : "—";
+}
+
 const typeColors: Record<string, string> = {
   restock: "bg-[#22C55E]/10 text-[#22C55E]",
   sale: "bg-[#C8A84E]/10 text-[#C8A84E]",
@@ -45,6 +82,7 @@ export default function AdminInventoryPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [movements, setMovements] = useState<Movement[]>([]);
   const [stats, setStats] = useState({ totalProducts: 0, totalItems: 0, totalValue: 0, lowStockCount: 0, outOfStockCount: 0 });
+  const [financials, setFinancials] = useState<Financials>(emptyFinancials);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
@@ -52,9 +90,10 @@ export default function AdminInventoryPage() {
   // Edit modal
   const [editProduct, setEditProduct] = useState<Product | null>(null);
   const [editFields, setEditFields] = useState({
-    sku: "", mcu: "", cost: "", weight_oz: "", reorder_point: "5", supplier: "", location: "",
+    sku: "", mcu: "", price: "", cost: "", weight_oz: "", reorder_point: "5", supplier: "", location: "",
   });
   const [editSaving, setEditSaving] = useState(false);
+  const [editError, setEditError] = useState("");
 
   // Movement modal
   const [moveProduct, setMoveProduct] = useState<Product | null>(null);
@@ -69,6 +108,7 @@ export default function AdminInventoryPage() {
     setProducts(data.products || []);
     setMovements(data.movements || []);
     setStats(data.stats || {});
+    setFinancials(data.financials || emptyFinancials);
     setLoading(false);
   }
 
@@ -85,9 +125,11 @@ export default function AdminInventoryPage() {
 
   function openEdit(p: Product) {
     setEditProduct(p);
+    setEditError("");
     setEditFields({
       sku: p.sku || "",
       mcu: p.mcu || "",
+      price: (p.price_cents / 100).toFixed(2),
       cost: p.cost_cents ? (p.cost_cents / 100).toFixed(2) : "",
       weight_oz: p.weight_oz ? String(p.weight_oz) : "",
       reorder_point: String(p.reorder_point || 5),
@@ -98,14 +140,21 @@ export default function AdminInventoryPage() {
 
   async function saveEdit() {
     if (!editProduct) return;
+    const priceCents = Math.round(parseFloat(editFields.price) * 100);
+    if (!Number.isFinite(priceCents) || priceCents <= 0) {
+      setEditError("Price must be greater than $0.00");
+      return;
+    }
+    setEditError("");
     setEditSaving(true);
-    await fetch("/api/admin/inventory", {
+    const res = await fetch("/api/admin/inventory", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         id: editProduct.id,
         sku: editFields.sku || null,
         mcu: editFields.mcu || null,
+        price_cents: priceCents,
         cost_cents: editFields.cost ? Math.round(parseFloat(editFields.cost) * 100) : 0,
         weight_oz: editFields.weight_oz ? parseFloat(editFields.weight_oz) : null,
         reorder_point: parseInt(editFields.reorder_point) || 5,
@@ -113,8 +162,13 @@ export default function AdminInventoryPage() {
         location: editFields.location || null,
       }),
     });
-    setEditProduct(null);
     setEditSaving(false);
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      setEditError(data.error || "Failed to save changes");
+      return;
+    }
+    setEditProduct(null);
     fetchData();
   }
 
@@ -150,12 +204,17 @@ export default function AdminInventoryPage() {
 
   const inputClass = "w-full rounded-lg border border-[#262626] bg-[#0A0A0A] px-3 py-2.5 text-sm text-white outline-none focus:border-[#C8A84E]";
 
+  const shelfProfit = financials.shelf.retail - financials.shelf.cost;
+  const soldProfit = financials.sold.revenue - financials.sold.cogs;
+  const pipelineTotal = financials.sold.revenue + financials.shelf.retail;
+  const soldShare = pipelineTotal > 0 ? (financials.sold.revenue / pipelineTotal) * 100 : 0;
+
   return (
     <div>
       <h1 className="text-2xl font-bold text-[#F5F5F5]">Inventory</h1>
 
       {/* Stats */}
-      <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+      <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         <div className="rounded-xl border border-[#262626] bg-[#141414] p-4">
           <Package className="h-5 w-5 text-[#C8A84E]" />
           <p className="mt-2 text-2xl font-bold text-[#F5F5F5]">{stats.totalItems}</p>
@@ -165,6 +224,11 @@ export default function AdminInventoryPage() {
           <DollarSign className="h-5 w-5 text-[#C8A84E]" />
           <p className="mt-2 text-2xl font-bold text-[#F5F5F5]">${(stats.totalValue / 100).toFixed(2)}</p>
           <p className="text-xs text-[#A3A3A3]">Inventory Value</p>
+        </div>
+        <div className="rounded-xl border border-[#262626] bg-[#141414] p-4">
+          <TrendingUp className="h-5 w-5 text-[#22C55E]" />
+          <p className="mt-2 text-2xl font-bold text-[#F5F5F5]">${(financials.shelf.retail / 100).toFixed(2)}</p>
+          <p className="text-xs text-[#A3A3A3]">Expected Value</p>
         </div>
         <div className="rounded-xl border border-[#262626] bg-[#141414] p-4">
           <Package className="h-5 w-5 text-[#3B82F6]" />
@@ -297,6 +361,124 @@ export default function AdminInventoryPage() {
         </table>
       </div>
 
+      {/* Margins & Value */}
+      <div className="mt-8">
+        <h2 className="text-lg font-semibold text-[#F5F5F5]">Margins &amp; Value</h2>
+        <p className="mt-1 text-xs text-[#A3A3A3]">What is on the shelf today versus what has sold in paid orders, all time. Sold cost uses each product&apos;s current cost.</p>
+
+        <div className="mt-4 grid gap-4 lg:grid-cols-2">
+          {/* On the shelf */}
+          <div className="rounded-xl border border-[#262626] bg-[#141414] p-5">
+            <div className="flex items-center gap-2">
+              <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: SHELF_COLOR }} />
+              <h3 className="text-sm font-semibold text-[#F5F5F5]">On the shelf</h3>
+              <span className="ml-auto text-xs text-[#A3A3A3]">{stats.totalItems.toLocaleString()} units</span>
+            </div>
+            <dl className="mt-4 space-y-2.5 text-sm">
+              <div className="flex justify-between"><dt className="text-[#A3A3A3]">Value at cost</dt><dd className="font-medium text-[#F5F5F5]">{money(financials.shelf.cost)}</dd></div>
+              <div className="flex justify-between"><dt className="text-[#A3A3A3]">Value at retail</dt><dd className="font-medium text-[#F5F5F5]">{money(financials.shelf.retail)}</dd></div>
+              <div className="flex justify-between"><dt className="text-[#A3A3A3]">Profit if it all sells</dt><dd className="font-medium text-[#F5F5F5]">{money(shelfProfit)}</dd></div>
+              <div className="flex justify-between border-t border-[#262626] pt-2.5"><dt className="text-[#A3A3A3]">Blended margin</dt><dd className="text-lg font-bold text-[#F5F5F5]">{pct(shelfProfit, financials.shelf.retail)}</dd></div>
+            </dl>
+          </div>
+
+          {/* Sold to date */}
+          <div className="rounded-xl border border-[#262626] bg-[#141414] p-5">
+            <div className="flex items-center gap-2">
+              <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: SOLD_COLOR }} />
+              <h3 className="text-sm font-semibold text-[#F5F5F5]">Sold to date</h3>
+              <span className="ml-auto text-xs text-[#A3A3A3]">{financials.sold.units.toLocaleString()} units</span>
+            </div>
+            <dl className="mt-4 space-y-2.5 text-sm">
+              <div className="flex justify-between"><dt className="text-[#A3A3A3]">Revenue</dt><dd className="font-medium text-[#F5F5F5]">{money(financials.sold.revenue)}</dd></div>
+              <div className="flex justify-between"><dt className="text-[#A3A3A3]">Cost of goods sold</dt><dd className="font-medium text-[#F5F5F5]">{money(financials.sold.cogs)}</dd></div>
+              <div className="flex justify-between"><dt className="text-[#A3A3A3]">Gross profit</dt><dd className="font-medium text-[#F5F5F5]">{money(soldProfit)}</dd></div>
+              <div className="flex justify-between border-t border-[#262626] pt-2.5"><dt className="text-[#A3A3A3]">Realized margin</dt><dd className="text-lg font-bold text-[#F5F5F5]">{pct(soldProfit, financials.sold.revenue)}</dd></div>
+            </dl>
+          </div>
+        </div>
+
+        {/* Sold vs still on shelf */}
+        <div className="mt-4 rounded-xl border border-[#262626] bg-[#141414] p-5">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <h3 className="text-sm font-semibold text-[#F5F5F5]">Sell-through</h3>
+            <p className="text-xs text-[#A3A3A3]">Revenue earned vs. retail value still in stock</p>
+          </div>
+          {pipelineTotal === 0 ? (
+            <p className="mt-4 text-sm text-[#A3A3A3]">No stock or sales yet</p>
+          ) : (
+            <>
+              <div className="mt-4 flex h-6 w-full gap-[2px] overflow-hidden rounded">
+                {financials.sold.revenue > 0 && (
+                  <div
+                    className="h-full rounded-l"
+                    style={{ width: `${soldShare}%`, backgroundColor: SOLD_COLOR }}
+                    title={`Sold: ${money(financials.sold.revenue)} (${Math.round(soldShare)}%)`}
+                  />
+                )}
+                {financials.shelf.retail > 0 && (
+                  <div
+                    className="h-full rounded-r"
+                    style={{ width: `${100 - soldShare}%`, backgroundColor: SHELF_COLOR }}
+                    title={`On shelf at retail: ${money(financials.shelf.retail)} (${Math.round(100 - soldShare)}%)`}
+                  />
+                )}
+              </div>
+              <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-xs text-[#A3A3A3]">
+                <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm" style={{ backgroundColor: SOLD_COLOR }} />Sold {money(financials.sold.revenue)} · {Math.round(soldShare)}%</span>
+                <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm" style={{ backgroundColor: SHELF_COLOR }} />On shelf {money(financials.shelf.retail)} · {Math.round(100 - soldShare)}%</span>
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Per-product breakdown */}
+        <div className="mt-4 overflow-x-auto rounded-xl border border-[#262626] bg-[#141414]">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-[#262626] text-left text-[#A3A3A3]">
+                <th className="px-4 py-3 font-medium">Product</th>
+                <th className="px-4 py-3 text-right font-medium">Stock</th>
+                <th className="px-4 py-3 text-right font-medium">Stock @ Cost</th>
+                <th className="px-4 py-3 text-right font-medium">Stock @ Retail</th>
+                <th className="px-4 py-3 text-right font-medium">Sold</th>
+                <th className="px-4 py-3 text-right font-medium">Revenue</th>
+                <th className="px-4 py-3 text-right font-medium">Profit</th>
+                <th className="px-4 py-3 text-right font-medium">Margin</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#262626]">
+              {loading ? (
+                <tr><td colSpan={8} className="py-8 text-center text-[#A3A3A3]">Loading...</td></tr>
+              ) : financials.products.length === 0 ? (
+                <tr><td colSpan={8} className="py-8 text-center text-[#A3A3A3]">No stock or sales yet</td></tr>
+              ) : (
+                financials.products.map((p) => {
+                  const marginPct = p.revenue > 0 ? Math.round((p.profit / p.revenue) * 100) : null;
+                  return (
+                    <tr key={p.id} className="hover:bg-[#1A1A1A]">
+                      <td className="px-4 py-3">
+                        <p className="font-medium text-[#F5F5F5]">{p.name}</p>
+                        <p className="text-xs capitalize text-[#A3A3A3]">{p.category}</p>
+                      </td>
+                      <td className="px-4 py-3 text-right text-[#A3A3A3]">{p.stock}</td>
+                      <td className="px-4 py-3 text-right text-[#A3A3A3]">{p.stockCost > 0 ? money(p.stockCost) : "—"}</td>
+                      <td className="px-4 py-3 text-right text-[#F5F5F5]">{money(p.stockRetail)}</td>
+                      <td className="px-4 py-3 text-right text-[#A3A3A3]">{p.unitsSold}</td>
+                      <td className="px-4 py-3 text-right text-[#F5F5F5]">{p.revenue > 0 ? money(p.revenue) : "—"}</td>
+                      <td className={`px-4 py-3 text-right ${p.revenue > 0 ? (p.profit >= 0 ? "text-[#22C55E]" : "text-[#EF4444]") : "text-[#A3A3A3]"}`}>
+                        {p.revenue > 0 ? money(p.profit) : "—"}
+                      </td>
+                      <td className="px-4 py-3 text-right text-[#A3A3A3]">{marginPct === null ? "—" : `${marginPct}%`}</td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       {/* Movement History */}
       <div className="mt-8">
         <h2 className="text-lg font-semibold text-[#F5F5F5]">Movement History</h2>
@@ -362,18 +544,25 @@ export default function AdminInventoryPage() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
+                  <label className="mb-1 block text-xs text-[#A3A3A3]">Price ($)</label>
+                  <input type="number" step="0.01" min="0.01" value={editFields.price} onChange={(e) => setEditFields({ ...editFields, price: e.target.value })} placeholder="0.00" className={inputClass} />
+                  <p className="mt-1 text-[10px] text-[#A3A3A3]">Shown to customers in the shop</p>
+                </div>
+                <div>
                   <label className="mb-1 block text-xs text-[#A3A3A3]">Cost ($)</label>
                   <input type="number" step="0.01" value={editFields.cost} onChange={(e) => setEditFields({ ...editFields, cost: e.target.value })} placeholder="0.00" className={inputClass} />
                 </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="mb-1 block text-xs text-[#A3A3A3]">Weight (oz)</label>
                   <input type="number" step="0.1" value={editFields.weight_oz} onChange={(e) => setEditFields({ ...editFields, weight_oz: e.target.value })} placeholder="0.0" className={inputClass} />
                 </div>
-              </div>
-              <div>
-                <label className="mb-1 block text-xs text-[#A3A3A3]">Reorder Point</label>
-                <input type="number" value={editFields.reorder_point} onChange={(e) => setEditFields({ ...editFields, reorder_point: e.target.value })} className={inputClass} />
-                <p className="mt-1 text-[10px] text-[#A3A3A3]">Alert when stock falls below this number</p>
+                <div>
+                  <label className="mb-1 block text-xs text-[#A3A3A3]">Reorder Point</label>
+                  <input type="number" value={editFields.reorder_point} onChange={(e) => setEditFields({ ...editFields, reorder_point: e.target.value })} className={inputClass} />
+                  <p className="mt-1 text-[10px] text-[#A3A3A3]">Alert when stock falls below this</p>
+                </div>
               </div>
               <div>
                 <label className="mb-1 block text-xs text-[#A3A3A3]">Supplier</label>
@@ -384,6 +573,8 @@ export default function AdminInventoryPage() {
                 <input value={editFields.location} onChange={(e) => setEditFields({ ...editFields, location: e.target.value })} placeholder="e.g. Shelf A-3" className={inputClass} />
               </div>
             </div>
+
+            {editError && <p className="mt-3 text-sm text-[#EF4444]">{editError}</p>}
 
             <div className="mt-6 flex gap-3">
               <button onClick={() => setEditProduct(null)} className="flex-1 rounded-lg border border-[#262626] py-2.5 text-sm text-[#A3A3A3] hover:bg-[#1A1A1A]">
