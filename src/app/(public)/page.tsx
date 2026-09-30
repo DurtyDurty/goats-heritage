@@ -16,9 +16,9 @@ export default async function HomePage() {
     .select("*")
     .eq("is_active", true)
     .eq("category", "cigar")
-    .in("slug", ["baby-goats", "florentino"])
+    .in("slug", ["jared", "florentino", "baby-goats", "baby-goats-honey-vanilla"])
     .order("created_at", { ascending: false })
-    .limit(2);
+    .limit(4);
 
   const { data: upcomingEvents } = await supabase
     .from("events")
@@ -39,13 +39,21 @@ export default async function HomePage() {
             <Image src="/images/logo.png" alt="Goats Heritage" width={500} height={500} className="mx-auto h-56 w-auto sm:h-64 md:h-72 lg:h-80" />
           </div>
 
-          <h1 className="mt-8 text-5xl font-bold leading-tight md:text-7xl">
-            <span className="text-[#C8A84E]">Heritage</span> in Every Draw
+          <h1 className="mt-8 text-5xl font-bold uppercase leading-tight tracking-wide md:text-7xl">
+            Welcome to the <span className="text-[#C8A84E]">Herd</span>
           </h1>
 
           <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-[#A3A3A3]">
-            Curated premium cigars, exclusive merch, and a community built on
-            tradition. Welcome to the culture.
+            A community built on tradition, and the mindset to never quit
+            climbing until you conquer your own mountain.
+          </p>
+
+          <p className="mx-auto mt-4 max-w-2xl text-lg leading-relaxed text-[#F5F5F5]">
+            We offer premium cigars and exclusive merchandise.
+          </p>
+
+          <p className="mt-4 text-sm font-medium uppercase tracking-[0.3em] text-[#C8A84E]">
+            Built with purpose.
           </p>
 
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
