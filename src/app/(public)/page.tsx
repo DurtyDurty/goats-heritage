@@ -3,6 +3,7 @@ import Image from "next/image";
 import ProductCard from "@/components/shop/ProductCard";
 import HeroCarousel from "@/components/home/HeroCarousel";
 import ExperienceSlideshow from "@/components/home/ExperienceSlideshow";
+import InstagramFeed from "@/components/home/InstagramFeed";
 import FadeIn from "@/components/ui/FadeIn";
 import { type Product } from "@/lib/types";
 import { createClient } from "@/lib/supabase/server";
@@ -178,6 +179,9 @@ export default async function HomePage() {
           </FadeIn>
         </div>
       </section>
+
+      {/* ── Instagram (renders only once a token is configured) ── */}
+      <InstagramFeed />
     </>
   );
 }
