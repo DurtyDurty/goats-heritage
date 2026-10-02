@@ -5,8 +5,15 @@
 // These are BASELINE rates. Change the numbers here and every place stays in sync.
 
 /** Flat shipping fee, waived at the free-shipping threshold (matches the Shipping Policy). */
-export const SHIPPING_FLAT_CENTS = 795;
+export const SHIPPING_FLAT_CENTS = 495;
 export const FREE_SHIPPING_THRESHOLD_CENTS = 7500;
+
+/**
+ * Smallest number of cigars (any mix) an order may contain. A single cigar is not
+ * worth a shipment once postage and adult signature are paid. Orders with no
+ * cigars have no minimum.
+ */
+export const MIN_CIGARS_PER_ORDER = 3;
 
 /**
  * Sales tax by destination state (2-letter code). States not listed are charged no tax.
@@ -35,6 +42,14 @@ export interface PricedLine {
   category: string;
   unit_price_cents: number;
   quantity: number;
+}
+
+/** How many more cigars the cart needs to reach the minimum. 0 when it is met or there are no cigars. */
+export function cigarsNeeded(lines: { category: string; quantity: number }[]): number {
+  const cigars = lines
+    .filter((l) => TOBACCO_CATEGORIES.includes(l.category))
+    .reduce((sum, l) => sum + l.quantity, 0);
+  return cigars === 0 ? 0 : Math.max(0, MIN_CIGARS_PER_ORDER - cigars);
 }
 
 export interface OrderTotals {

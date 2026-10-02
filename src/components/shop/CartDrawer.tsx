@@ -7,6 +7,7 @@ import { X, Minus, Plus, Trash2 } from "lucide-react";
 import { useCart } from "@/lib/cart-context";
 import { formatPrice } from "@/lib/types";
 import { redirectToCheckout } from "@/lib/checkout";
+import { cigarsNeeded, MIN_CIGARS_PER_ORDER } from "@/lib/pricing";
 
 export default function CartDrawer() {
   const [checkoutLoading, setCheckoutLoading] = useState(false);
@@ -24,6 +25,8 @@ export default function CartDrawer() {
   } = useCart();
 
   if (!isLoaded) return null;
+
+  const needed = cigarsNeeded(items);
 
   return (
     <>
@@ -166,6 +169,12 @@ export default function CartDrawer() {
                 </span>
               </div>
 
+              {needed > 0 && (
+                <p role="status" className="mt-3 rounded-lg border border-[#F59E0B]/30 bg-[#F59E0B]/5 px-3 py-2 text-xs text-[#F59E0B]">
+                  The minimum order is {MIN_CIGARS_PER_ORDER} cigars. Add {needed} more to check out.
+                </p>
+              )}
+
               <label className="mt-4 flex items-start gap-2 text-xs text-[#A3A3A3]">
                 <input
                   type="checkbox"
@@ -195,7 +204,7 @@ export default function CartDrawer() {
                     setCheckoutLoading(false);
                   }
                 }}
-                disabled={checkoutLoading || !ageConfirmed}
+                disabled={checkoutLoading || !ageConfirmed || needed > 0}
                 className="mt-4 block w-full rounded-lg bg-[#C8A84E] py-4 text-center font-bold text-black transition-colors hover:bg-[#E8D48B] disabled:opacity-50"
               >
                 {checkoutLoading ? "Redirecting..." : "Proceed to Checkout"}

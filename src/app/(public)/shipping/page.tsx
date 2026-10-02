@@ -17,7 +17,7 @@ export default function ShippingPage() {
 
         <h1 className="text-3xl font-bold text-white">Shipping Policy</h1>
         <div className="mt-2 h-1 w-16 bg-[#C8A84E]" />
-        <p className="mt-4 text-sm text-neutral-500">Last updated: March 2026</p>
+        <p className="mt-4 text-sm text-neutral-500">Last updated: October 2026</p>
 
         <div className="mt-8 space-y-10 text-neutral-300 leading-relaxed">
           {/* 1. Shipping Overview */}
@@ -56,7 +56,7 @@ export default function ShippingPage() {
                 <tbody>
                   <tr className="border-b border-neutral-800/50">
                     <td className="px-4 py-3">Under $75.00</td>
-                    <td className="px-4 py-3">$7.95 flat rate</td>
+                    <td className="px-4 py-3">$4.95 flat rate</td>
                   </tr>
                   <tr>
                     <td className="px-4 py-3">$75.00 and above</td>
@@ -67,6 +67,12 @@ export default function ShippingPage() {
             </div>
             <p className="mt-4 text-neutral-400">
               Expedited shipping options may be available at checkout for an additional cost. Shipping rates are calculated before applicable taxes.
+            </p>
+            <p className="mt-4 text-neutral-400">
+              Free shipping applies when the merchandise subtotal, before tax, is $75.00 or more. Applicable sales tax is shown at checkout.
+            </p>
+            <p className="mt-4 text-neutral-400">
+              Orders containing cigars have a minimum of 3 cigars. You can mix and match any cigars to reach the minimum.
             </p>
           </div>
 

@@ -7,7 +7,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { PURCHASES_ENABLED, PURCHASES_PAUSED_MESSAGE } from "@/lib/purchases";
 import { ageFromDob, MINIMUM_AGE } from "@/lib/age";
 import { bankfulConfigured, bankfulEnvironment, createHostedPayment } from "@/lib/bankful";
-import { calculateTotals, type PricedLine } from "@/lib/pricing";
+import { calculateTotals, cigarsNeeded, MIN_CIGARS_PER_ORDER, type PricedLine } from "@/lib/pricing";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -115,6 +115,13 @@ export async function POST(request: Request) {
       }
       lines.push({ product_id: product.id, quantity: item.quantity, unit_price_cents: product.price_cents });
       pricedLines.push({ category: product.category, unit_price_cents: product.price_cents, quantity: item.quantity });
+    }
+
+    if (cigarsNeeded(pricedLines) > 0) {
+      return NextResponse.json(
+        { error: `The minimum order is ${MIN_CIGARS_PER_ORDER} cigars. Please add more to your cart.` },
+        { status: 400 }
+      );
     }
 
     // Items + shipping + tax for the destination state. This is the amount charged.

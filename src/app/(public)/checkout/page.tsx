@@ -11,7 +11,7 @@ import { createClient } from "@/lib/supabase/client";
 import CardLogos from "@/components/checkout/CardLogos";
 import { PURCHASES_ENABLED, PURCHASES_PAUSED_MESSAGE } from "@/lib/purchases";
 import { ageFromDob, daysInMonth, MINIMUM_AGE } from "@/lib/age";
-import { calculateTotals, FREE_SHIPPING_THRESHOLD_CENTS } from "@/lib/pricing";
+import { calculateTotals, cigarsNeeded, FREE_SHIPPING_THRESHOLD_CENTS, MIN_CIGARS_PER_ORDER } from "@/lib/pricing";
 
 const MONTHS = [
   "January", "February", "March", "April", "May", "June",
@@ -113,7 +113,10 @@ export default function CheckoutPage() {
     state
   );
 
+  const needed = cigarsNeeded(items);
+
   function validate(): string | null {
+    if (needed > 0) return `The minimum order is ${MIN_CIGARS_PER_ORDER} cigars. Add ${needed} more to continue.`;
     if (!EMAIL_REGEX.test(email.trim())) return "Enter a valid email address for your order confirmation.";
     if (!state) return "Select your state.";
     if (!/^\d{5}(-\d{4})?$/.test(zip.trim())) return "Enter a valid ZIP code.";
@@ -442,6 +445,13 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
+              {needed > 0 && (
+                <p role="status" className="rounded-lg border border-[#F59E0B]/30 bg-[#F59E0B]/5 px-4 py-3 text-sm text-[#F59E0B]">
+                  The minimum order is {MIN_CIGARS_PER_ORDER} cigars. Add {needed} more to continue.{" "}
+                  <Link href="/shop/cigar" className="underline hover:text-[#E8D48B]">Browse cigars</Link>
+                </p>
+              )}
+
               {hasCigars && (
                 <label className="flex items-start gap-3 rounded-lg border border-[#262626] bg-[#0A0A0A] p-4 text-xs leading-relaxed text-[#A3A3A3]">
                   <input
@@ -462,7 +472,7 @@ export default function CheckoutPage() {
 
               <button
                 type="submit"
-                disabled={loading || !canPurchase}
+                disabled={loading || !canPurchase || needed > 0}
                 className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#C8A84E] py-4 font-bold text-black transition-colors hover:bg-[#E8D48B] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <Lock className="h-4 w-4" />
