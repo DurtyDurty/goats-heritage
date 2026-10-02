@@ -353,6 +353,12 @@ export default function CheckoutPage() {
             and local laws. You must be 21 years or older to purchase tobacco
             products.
           </p>
+          <p className="text-center text-xs text-[#A3A3A3]">
+            By placing your order you agree to our{" "}
+            <a href="/terms" className="text-[#C8A84E] hover:text-[#E8D48B]">Terms of Service</a>,{" "}
+            <a href="/shipping" className="text-[#C8A84E] hover:text-[#E8D48B]">Shipping Policy</a>, and{" "}
+            <a href="/refund-policy" className="text-[#C8A84E] hover:text-[#E8D48B]">Refund Policy</a>.
+          </p>
         </form>
       </div>
     </section>

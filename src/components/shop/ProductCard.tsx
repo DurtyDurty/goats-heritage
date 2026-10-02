@@ -29,28 +29,15 @@ export default function ProductCard({ product }: { product: Product }) {
   return (
     <div className="group relative flex flex-col overflow-hidden rounded-xl border border-[#262626] bg-[#141414] transition-all duration-300 hover:border-[#C8A84E]">
       {/* Image */}
-      <Link href={href} className="relative aspect-square overflow-hidden bg-[#0A0A0A]">
+      <Link href={href} className="relative aspect-[2/3] overflow-hidden bg-[#0A0A0A]">
         {hasImage ? (
-          <>
-            <Image
-              src={product.images[0]}
-              alt={product.name}
-              fill
-              className="object-cover blur-sm brightness-50 transition-all duration-300 group-hover:blur-[6px] group-hover:brightness-[0.4]"
-            />
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <Image
-                src="/images/logo.png"
-                alt="Goats Heritage"
-                width={200}
-                height={100}
-                className="h-24 w-auto sm:h-28 opacity-90"
-              />
-              <span className="mt-4 rounded-full bg-[#C8A84E]/10 px-5 py-1.5 text-sm font-bold uppercase tracking-widest text-[#C8A84E]">
-                Coming Soon
-              </span>
-            </div>
-          </>
+          <Image
+            src={product.images[0]}
+            alt={product.name}
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+          />
         ) : (
           <div className="flex h-full flex-col items-center justify-center bg-[#0A0A0A]">
             <Image
@@ -58,11 +45,8 @@ export default function ProductCard({ product }: { product: Product }) {
               alt="Goats Heritage"
               width={200}
               height={100}
-              className="h-24 w-auto sm:h-28 opacity-60"
+              className="h-24 w-auto sm:h-28 opacity-80"
             />
-            <span className="mt-4 rounded-full bg-[#C8A84E]/10 px-5 py-1.5 text-sm font-bold uppercase tracking-widest text-[#C8A84E]">
-              Coming Soon
-            </span>
           </div>
         )}
 
@@ -110,7 +94,7 @@ export default function ProductCard({ product }: { product: Product }) {
       ) : (
         <button
           onClick={handleAdd}
-          className="w-full translate-y-2 bg-[#C8A84E] py-2.5 text-sm font-semibold text-black opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100"
+          className="w-full bg-[#C8A84E] py-2.5 text-sm font-semibold text-black transition-colors hover:bg-[#E8D48B]"
         >
           Add to Cart
         </button>

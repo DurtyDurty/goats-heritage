@@ -10,28 +10,16 @@ export default function ImageGallery({ images }: { images: string[] }) {
   return (
     <div>
       {/* Main image */}
-      <div className="relative aspect-square overflow-hidden rounded-xl bg-[#0A0A0A]">
+      <div className="relative mx-auto aspect-[2/3] w-full max-w-md overflow-hidden rounded-xl bg-[#0A0A0A]">
         {hasImages ? (
-          <>
-            <Image
-              src={images[activeIndex]}
-              alt="Product image"
-              fill
-              className="object-cover blur-sm brightness-50"
-            />
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <Image
-                src="/images/logo.png"
-                alt="Goats Heritage"
-                width={200}
-                height={100}
-                className="h-24 w-auto opacity-90"
-              />
-              <span className="mt-4 rounded-full bg-[#C8A84E]/10 px-5 py-1.5 text-sm font-bold uppercase tracking-widest text-[#C8A84E]">
-                Coming Soon
-              </span>
-            </div>
-          </>
+          <Image
+            src={images[activeIndex]}
+            alt="Product image"
+            fill
+            sizes="(max-width: 1024px) 100vw, 448px"
+            className="object-cover"
+            priority
+          />
         ) : (
           <div className="flex h-full flex-col items-center justify-center">
             <Image
@@ -39,11 +27,8 @@ export default function ImageGallery({ images }: { images: string[] }) {
               alt="Goats Heritage"
               width={200}
               height={100}
-              className="h-24 w-auto opacity-60"
+              className="h-24 w-auto opacity-80"
             />
-            <span className="mt-4 rounded-full bg-[#C8A84E]/10 px-5 py-1.5 text-sm font-bold uppercase tracking-widest text-[#C8A84E]">
-              Coming Soon
-            </span>
           </div>
         )}
       </div>
@@ -61,7 +46,7 @@ export default function ImageGallery({ images }: { images: string[] }) {
                   : "border-[#262626] hover:border-[#A3A3A3]"
               }`}
             >
-              <Image src={src} alt="" fill className="object-cover blur-sm brightness-50" />
+              <Image src={src} alt="" fill sizes="64px" className="object-cover" />
             </button>
           ))}
         </div>

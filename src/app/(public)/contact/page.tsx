@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { Metadata } from "next";
+import { BUSINESS } from "@/lib/business";
 
 // export const metadata: Metadata = {
 //   title: "Contact | Goats Heritage\u2122",
@@ -81,6 +82,34 @@ export default function ContactPage() {
                   contact@goatsheritage.com
                 </a>
               </div>
+              {BUSINESS.addressLines.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-semibold uppercase tracking-wider text-[#F5F5F5]">
+                    Location
+                  </h3>
+                  <address className="mt-2 text-sm not-italic leading-relaxed text-[#A3A3A3]">
+                    {BUSINESS.name}
+                    {BUSINESS.addressLines.map((line) => (
+                      <span key={line} className="block">
+                        {line}
+                      </span>
+                    ))}
+                  </address>
+                </div>
+              )}
+              {BUSINESS.phone && (
+                <div>
+                  <h3 className="text-sm font-semibold uppercase tracking-wider text-[#F5F5F5]">
+                    Call Us
+                  </h3>
+                  <a
+                    href={`tel:${BUSINESS.phone.replace(/[^\d+]/g, "")}`}
+                    className="mt-2 block text-[#C8A84E] transition-colors hover:text-[#E8D48B]"
+                  >
+                    {BUSINESS.phone}
+                  </a>
+                </div>
+              )}
               <div>
                 <h3 className="text-sm font-semibold uppercase tracking-wider text-[#F5F5F5]">
                   Response Time
