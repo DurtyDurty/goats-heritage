@@ -18,8 +18,9 @@ export type BankfulEnvironment = keyof typeof HOSTED_PAGE_URLS;
 
 function config() {
   return {
-    username: process.env.BANKFUL_USERNAME || "",
-    password: process.env.BANKFUL_PASSWORD || "",
+    // Trimmed: a stray newline from a copy-paste would silently break every signature
+    username: (process.env.BANKFUL_USERNAME || "").trim(),
+    password: (process.env.BANKFUL_PASSWORD || "").trim(),
     // Anything other than an explicit "production" stays on the sandbox
     environment: (process.env.BANKFUL_ENV === "production" ? "production" : "sandbox") as BankfulEnvironment,
   };
