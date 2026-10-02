@@ -4,17 +4,14 @@ export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { createTransaction } from "@/lib/authnet/helpers";
-import { sendOrderConfirmation } from "@/lib/email/send";
 import { PURCHASES_ENABLED, PURCHASES_PAUSED_MESSAGE } from "@/lib/purchases";
 import { ageFromDob, MINIMUM_AGE } from "@/lib/age";
+import { bankfulConfigured, bankfulEnvironment, createHostedPayment } from "@/lib/bankful";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 interface CartItem {
   product_id: string;
-  name: string;
-  price_cents: number;
   quantity: number;
 }
 
@@ -28,12 +25,10 @@ interface ShippingAddress {
   phone: string;
 }
 
+// Creates a pending order and returns the Bankful hosted payment page URL.
+// The order becomes paid only when Bankful reports an approved, signed result
+// (see src/lib/order-payments.ts).
 export async function POST(request: Request) {
-  // Purchases are paused: stop before any charge, order, or inventory change
-  if (!PURCHASES_ENABLED) {
-    return NextResponse.json({ error: PURCHASES_PAUSED_MESSAGE }, { status: 503 });
-  }
-
   try {
     const supabase = createClient();
     const {
@@ -41,19 +36,48 @@ export async function POST(request: Request) {
     } = await supabase.auth.getUser();
 
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return PURCHASES_ENABLED
+        ? NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+        : NextResponse.json({ error: PURCHASES_PAUSED_MESSAGE }, { status: 503 });
     }
 
-    const { opaqueData, items, shippingAddress, email, dateOfBirth } = (await request.json()) as {
-      opaqueData: { dataDescriptor: string; dataValue: string };
+    const adminSupabase = createAdminClient();
+    const { data: profile } = await adminSupabase
+      .from("profiles")
+      .select("email, role, date_of_birth, age_verified")
+      .eq("id", user.id)
+      .single();
+
+    // Purchases are paused for customers. Admins can still place test orders,
+    // and only while the gateway is on the sandbox, so no real card is charged.
+    if (!PURCHASES_ENABLED) {
+      const adminSandboxTest = profile?.role === "admin" && bankfulEnvironment() === "sandbox";
+      if (!adminSandboxTest) {
+        return NextResponse.json({ error: PURCHASES_PAUSED_MESSAGE }, { status: 503 });
+      }
+    }
+
+    if (!bankfulConfigured()) {
+      return NextResponse.json({ error: "Payments are not set up yet. Please try again later." }, { status: 503 });
+    }
+
+    const { items, shippingAddress, email, dateOfBirth } = (await request.json()) as {
       items: CartItem[];
       shippingAddress: ShippingAddress;
       email?: string;
       dateOfBirth?: string;
     };
 
-    if (!items || items.length === 0) {
+    if (!Array.isArray(items) || items.length === 0) {
       return NextResponse.json({ error: "Cart is empty" }, { status: 400 });
+    }
+    if (items.some((i) => !i.product_id || !Number.isInteger(i.quantity) || i.quantity < 1)) {
+      return NextResponse.json({ error: "Your cart has an invalid item. Please refresh and try again." }, { status: 400 });
+    }
+
+    const required: (keyof ShippingAddress)[] = ["firstName", "lastName", "address", "city", "state", "zip", "phone"];
+    if (!shippingAddress || required.some((k) => !String(shippingAddress[k] || "").trim())) {
+      return NextResponse.json({ error: "Enter your full shipping address." }, { status: 400 });
     }
 
     const contactEmail = (email || "").trim();
@@ -63,70 +87,45 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
+    // The email typed at checkout wins; fall back to the account email
+    const custEmail = contactEmail || profile?.email || user.email || "";
 
-    if (!opaqueData?.dataDescriptor || !opaqueData?.dataValue) {
-      return NextResponse.json(
-        { error: "Payment information is missing" },
-        { status: 400 }
-      );
-    }
-
-    // Validate products exist, are active, and in stock
-    const adminSupabase = createAdminClient();
-    const productIds = items.map((i) => i.product_id);
+    // Validate products and take prices from the database, never from the browser
     const { data: products, error: productsError } = await adminSupabase
       .from("products")
-      .select("id, name, price_cents, inventory_count, category, is_active")
-      .in("id", productIds);
+      .select("id, name, price_cents, inventory_count, is_active")
+      .in("id", items.map((i) => i.product_id));
 
     if (productsError || !products) {
-      return NextResponse.json(
-        { error: "Failed to validate products" },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: "Failed to validate products" }, { status: 500 });
     }
 
     const productMap = new Map(products.map((p) => [p.id, p]));
+    const lines: { product_id: string; quantity: number; unit_price_cents: number }[] = [];
 
     for (const item of items) {
       const product = productMap.get(item.product_id);
       if (!product || !product.is_active) {
-        return NextResponse.json(
-          { error: `Product "${item.name}" is no longer available` },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: "An item in your cart is no longer available." }, { status: 400 });
       }
       if (product.inventory_count < item.quantity) {
-        return NextResponse.json(
-          { error: `"${product.name}" has insufficient stock` },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: `"${product.name}" has insufficient stock` }, { status: 400 });
       }
+      lines.push({ product_id: product.id, quantity: item.quantity, unit_price_cents: product.price_cents });
     }
+
+    const totalCents = lines.reduce((sum, l) => sum + l.unit_price_cents * l.quantity, 0);
 
     // Age verification: the date of birth entered at checkout must be valid,
     // 21 or older, and consistent with the one already on the account.
     const age = ageFromDob(dateOfBirth || "");
     if (age === null) {
-      return NextResponse.json(
-        { error: "Enter your full date of birth to verify your age." },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Enter your full date of birth to verify your age." }, { status: 400 });
     }
     if (age < MINIMUM_AGE) {
-      return NextResponse.json(
-        { error: `You must be ${MINIMUM_AGE} or older to place an order.` },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: `You must be ${MINIMUM_AGE} or older to place an order.` }, { status: 403 });
     }
-
-    const { data: ageProfile } = await adminSupabase
-      .from("profiles")
-      .select("date_of_birth, age_verified")
-      .eq("id", user.id)
-      .single();
-
-    if (ageProfile?.date_of_birth && ageProfile.date_of_birth !== dateOfBirth) {
+    if (profile?.date_of_birth && profile.date_of_birth !== dateOfBirth) {
       return NextResponse.json(
         {
           error:
@@ -135,70 +134,20 @@ export async function POST(request: Request) {
         { status: 403 }
       );
     }
-
-    if (!ageProfile?.date_of_birth || !ageProfile.age_verified) {
+    if (!profile?.date_of_birth || !profile.age_verified) {
       await adminSupabase
         .from("profiles")
         .update({ date_of_birth: dateOfBirth, age_verified: true })
         .eq("id", user.id);
     }
 
-    // Get customer info from profile
-    const { data: profile } = await adminSupabase
-      .from("profiles")
-      .select("full_name, email")
-      .eq("id", user.id)
-      .single();
-
-    const nameParts = (profile?.full_name || "").split(" ");
-    const custFirstName = nameParts[0] || shippingAddress.firstName;
-    const custLastName = nameParts.slice(1).join(" ") || shippingAddress.lastName;
-    // The email typed at checkout wins; fall back to the account email
-    const custEmail = contactEmail || profile?.email || user.email || "";
-
-    // Calculate total in dollars
-    const totalCents = items.reduce(
-      (sum, i) => sum + i.price_cents * i.quantity,
-      0
-    );
-    const totalDollars = totalCents / 100;
-
-    // Generate invoice number
-    const invoiceNumber = "GH-" + Date.now();
-
-    // Create transaction via Authorize.Net
-    const result = await createTransaction({
-      amountInDollars: totalDollars,
-      opaqueData,
-      items: items.map((item) => ({
-        name: item.name,
-        quantity: item.quantity,
-        unitPrice: item.price_cents / 100,
-      })),
-      customerInfo: {
-        firstName: custFirstName,
-        lastName: custLastName,
-        email: custEmail,
-      },
-      shippingAddress,
-      invoiceNumber,
-    });
-
-    if (!result.success) {
-      return NextResponse.json(
-        { error: result.error || "Payment failed" },
-        { status: 400 }
-      );
-    }
-
-    // Create order in database
+    // Pending order: stock is checked now and deducted when the payment is approved
     const { data: order, error: orderError } = await adminSupabase
       .from("orders")
       .insert({
         user_id: user.id,
-        status: "paid",
+        status: "pending",
         total_cents: totalCents,
-        authnet_transaction_id: result.transactionId,
         shipping_address: { ...shippingAddress, email: custEmail, date_of_birth: dateOfBirth },
       })
       .select("id")
@@ -206,72 +155,45 @@ export async function POST(request: Request) {
 
     if (orderError || !order) {
       console.error("Failed to create order:", orderError);
-      return NextResponse.json(
-        { error: "Payment succeeded but order creation failed. Contact support." },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: "We could not start your order. Please try again." }, { status: 500 });
     }
 
-    // Create order items
-    const itemsToInsert = items.map((item) => ({
-      order_id: order.id,
-      product_id: item.product_id,
-      quantity: item.quantity,
-      unit_price_cents: item.price_cents,
-    }));
+    const { error: itemsError } = await adminSupabase
+      .from("order_items")
+      .insert(lines.map((l) => ({ order_id: order.id, ...l })));
 
-    await adminSupabase.from("order_items").insert(itemsToInsert);
-
-    // Decrement inventory
-    for (const item of items) {
-      await adminSupabase.rpc("decrement_inventory", {
-        p_product_id: item.product_id,
-        p_quantity: item.quantity,
-      });
+    if (itemsError) {
+      console.error("Failed to create order items:", itemsError);
+      await adminSupabase.from("orders").update({ status: "cancelled" }).eq("id", order.id);
+      return NextResponse.json({ error: "We could not start your order. Please try again." }, { status: 500 });
     }
 
-    // Send order confirmation email
-    if (custEmail) {
-      const productIdsForEmail = items.map((i) => i.product_id);
-      const { data: emailProducts } = await adminSupabase
-        .from("products")
-        .select("id, name")
-        .in("id", productIdsForEmail);
+    const payment = await createHostedPayment({
+      orderId: order.id,
+      amountCents: totalCents,
+      siteUrl: new URL(request.url).origin,
+      customer: {
+        firstName: shippingAddress.firstName.trim(),
+        lastName: shippingAddress.lastName.trim(),
+        email: custEmail,
+        phone: shippingAddress.phone,
+      },
+      billing: {
+        address: shippingAddress.address.trim(),
+        city: shippingAddress.city.trim(),
+        state: shippingAddress.state,
+        zip: shippingAddress.zip.trim(),
+      },
+    });
 
-      const productNameMap = new Map(
-        (emailProducts || []).map((p) => [p.id, p.name])
-      );
-
-      const emailItems = items.map((item) => ({
-        name: productNameMap.get(item.product_id) || item.name,
-        qty: item.quantity,
-        price: item.price_cents,
-      }));
-
-      const addressStr = [
-        shippingAddress.address,
-        shippingAddress.city,
-        shippingAddress.state,
-        shippingAddress.zip,
-      ]
-        .filter(Boolean)
-        .join(", ");
-
-      await sendOrderConfirmation(custEmail, {
-        orderNumber: order.id,
-        items: emailItems,
-        total: totalCents,
-        shippingAddress: addressStr,
-        customerName: profile?.full_name || shippingAddress.firstName || "Valued Customer",
-      });
+    if (!payment.ok) {
+      await adminSupabase.from("orders").update({ status: "cancelled" }).eq("id", order.id);
+      return NextResponse.json({ error: payment.error }, { status: 502 });
     }
 
-    return NextResponse.json({ success: true, orderId: order.id });
+    return NextResponse.json({ redirectUrl: payment.redirectUrl, orderId: order.id });
   } catch (err: any) {
     console.error("Checkout error:", err);
-    return NextResponse.json(
-      { error: err.message || "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Something went wrong starting your order." }, { status: 500 });
   }
 }

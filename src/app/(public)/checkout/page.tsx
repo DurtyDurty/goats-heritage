@@ -1,11 +1,5 @@
 "use client";
 
-declare global {
-  interface Window {
-    Accept: any;
-  }
-}
-
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -14,7 +8,7 @@ import { Lock, ShieldCheck, ChevronLeft, CreditCard, Mail, Truck } from "lucide-
 import { useCart } from "@/lib/cart-context";
 import { formatPrice } from "@/lib/types";
 import { createClient } from "@/lib/supabase/client";
-import CardLogos, { CardLogo, detectCardBrand } from "@/components/checkout/CardLogos";
+import CardLogos from "@/components/checkout/CardLogos";
 import { PURCHASES_ENABLED, PURCHASES_PAUSED_MESSAGE } from "@/lib/purchases";
 import { ageFromDob, daysInMonth, MINIMUM_AGE } from "@/lib/age";
 
@@ -32,28 +26,6 @@ const US_STATES = [
 ];
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-function luhnValid(digits: string): boolean {
-  let sum = 0;
-  let double = false;
-  for (let i = digits.length - 1; i >= 0; i--) {
-    let d = parseInt(digits[i], 10);
-    if (double) {
-      d *= 2;
-      if (d > 9) d -= 9;
-    }
-    sum += d;
-    double = !double;
-  }
-  return digits.length >= 13 && sum % 10 === 0;
-}
-
-function formatCardNumber(digits: string, isAmex: boolean): string {
-  if (isAmex) {
-    return [digits.slice(0, 4), digits.slice(4, 10), digits.slice(10, 15)].filter(Boolean).join(" ");
-  }
-  return digits.replace(/(.{4})/g, "$1 ").trim();
-}
 
 const inputClass =
   "w-full rounded-lg border border-[#262626] bg-[#0A0A0A] px-4 py-3 text-sm text-[#F5F5F5] placeholder-[#555] outline-none transition-colors focus:border-[#C8A84E] focus:ring-1 focus:ring-[#C8A84E]/30";
@@ -74,13 +46,17 @@ function SectionHeading({ step, icon, title, aside }: { step: number; icon: Reac
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { items, isLoaded, clearCart, getCartTotal, getCartCount } = useCart();
+  const { items, isLoaded, getCartTotal, getCartCount } = useCart();
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [ageConfirmed, setAgeConfirmed] = useState(false);
   const [authenticated, setAuthenticated] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [pageReady, setPageReady] = useState(false);
+
+  // Customers can order only when purchases are switched on; admins can always run sandbox tests
+  const canPurchase = PURCHASES_ENABLED || isAdmin;
 
   // Contact
   const [email, setEmail] = useState("");
@@ -104,25 +80,17 @@ export default function CheckoutPage() {
   const dobAge = dobComplete ? ageFromDob(dateOfBirth) : null;
   const dobDays = Array.from({ length: daysInMonth(parseInt(dobMonth, 10) || 1, parseInt(dobYear, 10) || 0) }, (_, i) => i + 1);
 
-  // Card fields (digits only; formatted for display)
-  const [cardDigits, setCardDigits] = useState("");
-  const [expDigits, setExpDigits] = useState("");
-  const [cvv, setCvv] = useState("");
-
-  const brand = detectCardBrand(cardDigits);
-  const isAmex = brand === "amex";
-  const cardMaxLength = isAmex ? 15 : 16;
-  const cvvLength = isAmex ? 4 : 3;
-
-  // Auth check, and prefill the confirmation email from the account
+  // Auth check, prefill the confirmation email, and find out whether this is an admin
   useEffect(() => {
     const supabase = createClient();
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) {
         router.push("/login?redirect=/checkout");
         return;
       }
       setEmail((current) => current || user.email || "");
+      const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+      setIsAdmin(profile?.role === "admin");
       setAuthenticated(true);
     });
   }, [router]);
@@ -137,17 +105,6 @@ export default function CheckoutPage() {
     }
   }, [isLoaded, items, authenticated, router]);
 
-  // Load Accept.js
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (document.getElementById("accept-js-script")) return;
-    const script = document.createElement("script");
-    script.id = "accept-js-script";
-    script.src = "https://jstest.authorize.net/v1/Accept.js";
-    script.charset = "utf-8";
-    document.head.appendChild(script);
-  }, []);
-
   const hasCigars = items.some((item) => item.category === "cigar");
   const total = getCartTotal();
 
@@ -159,16 +116,6 @@ export default function CheckoutPage() {
     if (!dobComplete) return "Select your full date of birth to verify your age.";
     if (dobAge === null) return "That date of birth is not a valid date.";
     if (dobAge < MINIMUM_AGE) return `You must be ${MINIMUM_AGE} or older to place an order.`;
-    if (cardDigits.length !== cardMaxLength || !luhnValid(cardDigits)) return "Check your card number.";
-    if (expDigits.length !== 4) return "Enter your card's expiration date as MM / YY.";
-    const month = parseInt(expDigits.slice(0, 2), 10);
-    const year = 2000 + parseInt(expDigits.slice(2), 10);
-    if (month < 1 || month > 12) return "Check your card's expiration month.";
-    const now = new Date();
-    if (year < now.getFullYear() || (year === now.getFullYear() && month < now.getMonth() + 1)) {
-      return "This card has expired.";
-    }
-    if (cvv.length !== cvvLength) return `Enter the ${cvvLength}-digit security code.`;
     if (hasCigars && !ageConfirmed) return "You must confirm you are 21 or older to purchase tobacco products.";
     return null;
   }
@@ -177,8 +124,7 @@ export default function CheckoutPage() {
     e.preventDefault();
     setError("");
 
-    // Paused: stop before the card is sent anywhere
-    if (!PURCHASES_ENABLED) {
+    if (!canPurchase) {
       setError(PURCHASES_PAUSED_MESSAGE);
       return;
     }
@@ -189,66 +135,36 @@ export default function CheckoutPage() {
       return;
     }
 
-    if (!window.Accept) {
-      setError("The secure payment form is still loading. Please try again in a moment.");
-      return;
-    }
-
     setLoading(true);
 
-    // Card details go straight from the browser to Authorize.Net and come back as a one-time token
-    const authData = {
-      clientKey: process.env.NEXT_PUBLIC_AUTHNET_CLIENT_KEY!,
-      apiLoginID: process.env.NEXT_PUBLIC_AUTHNET_API_LOGIN_ID!,
-    };
+    try {
+      // The server creates the order and returns the secure payment page for it.
+      // Prices are looked up on the server, so only ids and quantities are sent.
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: email.trim(),
+          dateOfBirth,
+          items: items.map((i) => ({ product_id: i.product_id, quantity: i.quantity })),
+          shippingAddress: { firstName, lastName, address, city, state, zip, phone },
+        }),
+      });
 
-    const cardData = {
-      cardNumber: cardDigits,
-      month: expDigits.slice(0, 2),
-      year: "20" + expDigits.slice(2),
-      cardCode: cvv,
-    };
+      const data = await res.json();
 
-    window.Accept.dispatchData({ authData, cardData }, async (response: any) => {
-      if (response.messages.resultCode === "Error") {
-        setError(response.messages.message.map((m: any) => m.text).join(". "));
+      if (!res.ok || !data.redirectUrl) {
+        setError(data.error || "Checkout failed");
         setLoading(false);
         return;
       }
 
-      try {
-        const res = await fetch("/api/checkout", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            opaqueData: response.opaqueData,
-            email: email.trim(),
-            dateOfBirth,
-            items: items.map((i) => ({
-              product_id: i.product_id,
-              name: i.name,
-              price_cents: i.price_cents,
-              quantity: i.quantity,
-            })),
-            shippingAddress: { firstName, lastName, address, city, state, zip, phone },
-          }),
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-          setError(data.error || "Checkout failed");
-          setLoading(false);
-          return;
-        }
-
-        clearCart();
-        router.push("/account/orders?success=true");
-      } catch (err: any) {
-        setError(err.message || "Something went wrong");
-        setLoading(false);
-      }
-    });
+      // The cart is kept until the payment is confirmed, in case the customer comes back
+      window.location.href = data.redirectUrl;
+    } catch (err: any) {
+      setError(err.message || "Something went wrong");
+      setLoading(false);
+    }
   }
 
   if (!pageReady) {
@@ -277,11 +193,20 @@ export default function CheckoutPage() {
           </div>
         </div>
 
-        {!PURCHASES_ENABLED && (
+        {!PURCHASES_ENABLED && !isAdmin && (
           <div role="status" className="mt-6 rounded-xl border border-[#C8A84E]/40 bg-[#C8A84E]/5 px-5 py-4">
             <p className="font-semibold text-[#E8D48B]">Online ordering opens soon</p>
             <p className="mt-1 text-sm text-[#A3A3A3]">
               We are not taking payments yet, so orders cannot be placed and your card will not be charged.
+            </p>
+          </div>
+        )}
+
+        {!PURCHASES_ENABLED && isAdmin && (
+          <div role="status" className="mt-6 rounded-xl border border-[#3B82F6]/40 bg-[#3B82F6]/5 px-5 py-4">
+            <p className="font-semibold text-[#F5F5F5]">Admin test mode</p>
+            <p className="mt-1 text-sm text-[#A3A3A3]">
+              Ordering is paused for customers. As an admin you can place test orders through the payment sandbox. Use a test card. No real card is charged.
             </p>
           </div>
         )}
@@ -429,70 +354,21 @@ export default function CheckoutPage() {
                 step={4}
                 icon={<CreditCard className="h-4 w-4 text-[#C8A84E]" />}
                 title="Payment"
-                aside={<CardLogos active={brand} />}
+                aside={<CardLogos />}
               />
               <div className="mt-5 space-y-4">
-                <div>
-                  <label htmlFor="cardNumber" className={labelClass}>Card number</label>
-                  <div className="relative">
-                    <input
-                      id="cardNumber"
-                      type="text"
-                      required
-                      inputMode="numeric"
-                      autoComplete="cc-number"
-                      placeholder="1234 5678 9012 3456"
-                      value={formatCardNumber(cardDigits, isAmex)}
-                      onChange={(e) => {
-                        const digits = e.target.value.replace(/\D/g, "");
-                        const max = detectCardBrand(digits) === "amex" ? 15 : 16;
-                        setCardDigits(digits.slice(0, max));
-                      }}
-                      className={inputClass + " pr-16 tracking-wider"}
-                    />
-                    <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">
-                      {brand ? <CardLogo brand={brand} /> : <Lock className="h-4 w-4 text-[#555]" />}
-                    </span>
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="flex items-start gap-3 rounded-lg border border-[#262626] bg-[#0A0A0A] p-4">
+                  <Lock className="mt-0.5 h-5 w-5 flex-shrink-0 text-[#C8A84E]" />
                   <div>
-                    <label htmlFor="cardExp" className={labelClass}>Expiration date</label>
-                    <input
-                      id="cardExp"
-                      type="text"
-                      required
-                      inputMode="numeric"
-                      autoComplete="cc-exp"
-                      placeholder="MM / YY"
-                      value={expDigits.length > 2 ? `${expDigits.slice(0, 2)} / ${expDigits.slice(2)}` : expDigits}
-                      onChange={(e) => {
-                        let digits = e.target.value.replace(/\D/g, "").slice(0, 4);
-                        // "5" → "05" so a single-digit month does not need a leading zero
-                        if (digits.length === 1 && parseInt(digits, 10) > 1) digits = "0" + digits;
-                        setExpDigits(digits);
-                      }}
-                      className={inputClass}
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="cardCvv" className={labelClass}>Security code</label>
-                    <input
-                      id="cardCvv"
-                      type="text"
-                      required
-                      inputMode="numeric"
-                      autoComplete="cc-csc"
-                      placeholder={isAmex ? "4 digits" : "CVV"}
-                      value={cvv}
-                      onChange={(e) => setCvv(e.target.value.replace(/\D/g, "").slice(0, cvvLength))}
-                      className={inputClass}
-                    />
+                    <p className="text-sm font-medium text-[#F5F5F5]">Pay by card on our secure payment page</p>
+                    <p className="mt-1 text-xs leading-relaxed text-[#A3A3A3]">
+                      When you continue, you will be taken to a secure page hosted by our payment processor, Bankful, to enter your card. You return here as soon as the payment is complete.
+                    </p>
                   </div>
                 </div>
                 <p className="flex items-start gap-2 text-xs leading-relaxed text-[#A3A3A3]">
                   <ShieldCheck className="mt-0.5 h-4 w-4 flex-shrink-0 text-[#22C55E]" />
-                  Your card details are encrypted and sent directly to Authorize.Net. They are never stored on our servers.
+                  Your card details are entered only on the processor&apos;s encrypted page. They never pass through or get stored on our servers.
                 </p>
               </div>
             </div>
@@ -558,17 +434,17 @@ export default function CheckoutPage() {
 
               <button
                 type="submit"
-                disabled={loading || !PURCHASES_ENABLED}
+                disabled={loading || !canPurchase}
                 className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#C8A84E] py-4 font-bold text-black transition-colors hover:bg-[#E8D48B] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <Lock className="h-4 w-4" />
-                {!PURCHASES_ENABLED ? "Ordering Opens Soon" : loading ? "Processing..." : `Pay ${formatPrice(total)}`}
+                {!canPurchase ? "Ordering Opens Soon" : loading ? "Opening secure payment..." : "Continue to Secure Payment"}
               </button>
 
               <div className="flex flex-col items-center gap-3">
                 <CardLogos />
                 <p className="text-center text-[11px] leading-relaxed text-[#A3A3A3]">
-                  Payments are processed securely by Authorize.Net. You must be 21 or older to purchase tobacco products.
+                  Payments are processed securely by Bankful. You must be 21 or older to purchase tobacco products.
                 </p>
                 <p className="text-center text-[11px] leading-relaxed text-[#A3A3A3]">
                   By placing your order you agree to our{" "}
