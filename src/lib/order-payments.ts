@@ -1,6 +1,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendOrderConfirmation } from "@/lib/email/send";
 import type { BankfulResult } from "@/lib/bankful";
+import { calculateTotals } from "@/lib/pricing";
 
 export type PaymentOutcome = "paid" | "already_paid" | "declined" | "pending" | "invalid";
 
@@ -63,7 +64,7 @@ export async function applyBankfulResult(
 
   const { data: items } = await db
     .from("order_items")
-    .select("product_id, quantity, unit_price_cents, products(name)")
+    .select("product_id, quantity, unit_price_cents, products(name, category)")
     .eq("order_id", order.id);
 
   for (const item of items || []) {
@@ -73,7 +74,20 @@ export async function applyBankfulResult(
 
   const shipping = (order.shipping_address || {}) as Record<string, string>;
   if (shipping.email) {
+    // Rebuild the shipping and tax lines with the same rules that priced the order.
+    // Shown only when they add up to what was charged, so the email can never contradict the total.
+    const totals = calculateTotals(
+      (items || []).map((item: any) => ({
+        category: item.products?.category || "",
+        unit_price_cents: item.unit_price_cents,
+        quantity: item.quantity,
+      })),
+      shipping.state
+    );
+    const breakdown = totals.totalCents === order.total_cents ? totals : undefined;
+
     await sendOrderConfirmation(shipping.email, {
+      breakdown,
       orderNumber: order.id,
       items: (items || []).map((item: any) => ({
         name: item.products?.name || "Item",

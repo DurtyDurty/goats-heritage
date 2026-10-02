@@ -11,6 +11,7 @@ import { createClient } from "@/lib/supabase/client";
 import CardLogos from "@/components/checkout/CardLogos";
 import { PURCHASES_ENABLED, PURCHASES_PAUSED_MESSAGE } from "@/lib/purchases";
 import { ageFromDob, daysInMonth, MINIMUM_AGE } from "@/lib/age";
+import { calculateTotals, FREE_SHIPPING_THRESHOLD_CENTS } from "@/lib/pricing";
 
 const MONTHS = [
   "January", "February", "March", "April", "May", "June",
@@ -46,7 +47,7 @@ function SectionHeading({ step, icon, title, aside }: { step: number; icon: Reac
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { items, isLoaded, getCartTotal, getCartCount } = useCart();
+  const { items, isLoaded, getCartCount } = useCart();
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -106,7 +107,11 @@ export default function CheckoutPage() {
   }, [isLoaded, items, authenticated, router]);
 
   const hasCigars = items.some((item) => item.category === "cigar");
-  const total = getCartTotal();
+  // Estimate for display. The server recalculates from its own prices before charging.
+  const totals = calculateTotals(
+    items.map((i) => ({ category: i.category, unit_price_cents: i.price_cents, quantity: i.quantity })),
+    state
+  );
 
   function validate(): string | null {
     if (!EMAIL_REGEX.test(email.trim())) return "Enter a valid email address for your order confirmation.";
@@ -406,11 +411,34 @@ export default function CheckoutPage() {
               <div className="space-y-2 border-t border-[#262626] pt-4 text-sm">
                 <div className="flex justify-between text-[#A3A3A3]">
                   <span>Subtotal</span>
-                  <span>{formatPrice(total)}</span>
+                  <span>{formatPrice(totals.subtotalCents)}</span>
                 </div>
+                <div className="flex justify-between text-[#A3A3A3]">
+                  <span>Shipping</span>
+                  <span className={totals.shippingCents === 0 ? "text-[#22C55E]" : ""}>
+                    {totals.shippingCents === 0 ? "Free" : formatPrice(totals.shippingCents)}
+                  </span>
+                </div>
+                {totals.tobaccoTaxCents > 0 && (
+                  <div className="flex justify-between text-[#A3A3A3]">
+                    <span>Tobacco tax</span>
+                    <span>{formatPrice(totals.tobaccoTaxCents)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between text-[#A3A3A3]">
+                  <span>
+                    Sales tax{totals.salesTaxRate > 0 && ` (${state} ${(totals.salesTaxRate * 100).toFixed(totals.salesTaxRate * 100 % 1 === 0 ? 0 : 2)}%)`}
+                  </span>
+                  <span>{state ? formatPrice(totals.salesTaxCents) : "Select state"}</span>
+                </div>
+                {totals.shippingCents > 0 && (
+                  <p className="text-xs text-[#A3A3A3]">
+                    Add {formatPrice(FREE_SHIPPING_THRESHOLD_CENTS - totals.subtotalCents)} more for free shipping.
+                  </p>
+                )}
                 <div className="flex items-baseline justify-between border-t border-[#262626] pt-3">
                   <span className="font-semibold text-[#F5F5F5]">Total</span>
-                  <span className="text-2xl font-bold text-[#C8A84E]">{formatPrice(total)}</span>
+                  <span className="text-2xl font-bold text-[#C8A84E]">{formatPrice(totals.totalCents)}</span>
                 </div>
               </div>
 

@@ -7,6 +7,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { PURCHASES_ENABLED, PURCHASES_PAUSED_MESSAGE } from "@/lib/purchases";
 import { ageFromDob, MINIMUM_AGE } from "@/lib/age";
 import { bankfulConfigured, bankfulEnvironment, createHostedPayment } from "@/lib/bankful";
+import { calculateTotals, type PricedLine } from "@/lib/pricing";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -93,7 +94,7 @@ export async function POST(request: Request) {
     // Validate products and take prices from the database, never from the browser
     const { data: products, error: productsError } = await adminSupabase
       .from("products")
-      .select("id, name, price_cents, inventory_count, is_active")
+      .select("id, name, category, price_cents, inventory_count, is_active")
       .in("id", items.map((i) => i.product_id));
 
     if (productsError || !products) {
@@ -102,6 +103,7 @@ export async function POST(request: Request) {
 
     const productMap = new Map(products.map((p) => [p.id, p]));
     const lines: { product_id: string; quantity: number; unit_price_cents: number }[] = [];
+    const pricedLines: PricedLine[] = [];
 
     for (const item of items) {
       const product = productMap.get(item.product_id);
@@ -112,9 +114,11 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: `"${product.name}" has insufficient stock` }, { status: 400 });
       }
       lines.push({ product_id: product.id, quantity: item.quantity, unit_price_cents: product.price_cents });
+      pricedLines.push({ category: product.category, unit_price_cents: product.price_cents, quantity: item.quantity });
     }
 
-    const totalCents = lines.reduce((sum, l) => sum + l.unit_price_cents * l.quantity, 0);
+    // Items + shipping + tax for the destination state. This is the amount charged.
+    const totalCents = calculateTotals(pricedLines, shippingAddress.state).totalCents;
 
     // Age verification: the date of birth entered at checkout must be valid,
     // 21 or older, and consistent with the one already on the account.

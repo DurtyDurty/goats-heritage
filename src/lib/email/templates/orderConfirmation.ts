@@ -12,6 +12,8 @@ interface OrderConfirmationData {
   total: number;
   shippingAddress: string;
   customerName: string;
+  /** Optional cost lines shown above the total (all in cents). */
+  breakdown?: { subtotalCents: number; shippingCents: number; tobaccoTaxCents: number; salesTaxCents: number };
 }
 
 export function orderConfirmation({
@@ -20,7 +22,21 @@ export function orderConfirmation({
   total,
   shippingAddress,
   customerName,
+  breakdown,
 }: OrderConfirmationData): { subject: string; html: string } {
+  const costRow = (label: string, value: string) => `
+                <tr>
+                  <td style="padding:4px 12px;font-family:Arial,sans-serif;font-size:14px;color:#666;">${label}</td>
+                  <td style="padding:4px 12px;font-family:Arial,sans-serif;font-size:14px;color:#666;text-align:right;">${value}</td>
+                </tr>`;
+  const dollars = (cents: number) => `$${(cents / 100).toFixed(2)}`;
+  const breakdownRows = breakdown
+    ? costRow("Subtotal", dollars(breakdown.subtotalCents)) +
+      costRow("Shipping", breakdown.shippingCents === 0 ? "Free" : dollars(breakdown.shippingCents)) +
+      (breakdown.tobaccoTaxCents > 0 ? costRow("Tobacco tax", dollars(breakdown.tobaccoTaxCents)) : "") +
+      (breakdown.salesTaxCents > 0 ? costRow("Sales tax", dollars(breakdown.salesTaxCents)) : "")
+    : "";
+
   const itemRows = items
     .map(
       (item) => `
@@ -80,7 +96,7 @@ export function orderConfirmation({
               </table>
 
               <!-- Total -->
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">${breakdownRows}
                 <tr>
                   <td style="padding:10px 12px;font-family:Arial,sans-serif;font-size:16px;font-weight:700;color:#333;">Total</td>
                   <td style="padding:10px 12px;font-family:Arial,sans-serif;font-size:16px;font-weight:700;color:#333;text-align:right;">$${(total / 100).toFixed(2)}</td>
