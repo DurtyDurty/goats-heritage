@@ -5,5 +5,6 @@ export const BUSINESS = {
   name: "Goats Heritage™",
   email: "contact@goatsheritage.com",
   phone: "", // e.g. "(555) 123-4567"
-  addressLines: [] as string[], // e.g. ["123 Main St, Suite 100", "Houston, TX 77001"]
+  // Add the street address as the first line when it is ready to publish
+  addressLines: ["St. Johns, Florida", "United States"] as string[],
 };

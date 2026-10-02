@@ -11,6 +11,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Check } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { PURCHASES_ENABLED, PURCHASES_PAUSED_MESSAGE } from "@/lib/purchases";
 
 export default function JoinPage() {
   const router = useRouter();
@@ -75,6 +76,12 @@ export default function JoinPage() {
   async function handleSubscribe(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+
+    // Paused: stop before the card is sent anywhere
+    if (!PURCHASES_ENABLED) {
+      setError(PURCHASES_PAUSED_MESSAGE);
+      return;
+    }
 
     if (!ageConfirmed) {
       setError(
@@ -317,12 +324,18 @@ export default function JoinPage() {
 
           {error && <p className="text-sm text-[#EF4444]">{error}</p>}
 
+          {!PURCHASES_ENABLED && (
+            <p className="rounded-lg border border-[#C8A84E]/30 bg-[#C8A84E]/5 px-4 py-3 text-sm text-[#E8D48B]">
+              Memberships open soon. We are not taking payments yet, and you will not be charged.
+            </p>
+          )}
+
           <button
             type="submit"
-            disabled={subscribing}
+            disabled={subscribing || !PURCHASES_ENABLED}
             className="w-full rounded-lg bg-[#C8A84E] py-4 font-bold text-black transition-colors hover:bg-[#E8D48B] disabled:opacity-50"
           >
-            {subscribing ? "Processing..." : "Subscribe Now"}
+            {!PURCHASES_ENABLED ? "Memberships Open Soon" : subscribing ? "Processing..." : "Subscribe Now"}
           </button>
 
           <p className="text-center text-xs text-[#A3A3A3]">

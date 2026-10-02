@@ -6,8 +6,14 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createSubscription } from "@/lib/authnet/helpers";
 import { sendSubscriptionWelcome } from "@/lib/email/send";
+import { PURCHASES_ENABLED, PURCHASES_PAUSED_MESSAGE } from "@/lib/purchases";
 
 export async function POST(request: Request) {
+  // Purchases are paused: stop before any subscription or charge is created
+  if (!PURCHASES_ENABLED) {
+    return NextResponse.json({ error: PURCHASES_PAUSED_MESSAGE }, { status: 503 });
+  }
+
   try {
     const supabase = createClient();
     const {

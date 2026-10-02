@@ -6,6 +6,9 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createTransaction } from "@/lib/authnet/helpers";
 import { sendOrderConfirmation } from "@/lib/email/send";
+import { PURCHASES_ENABLED, PURCHASES_PAUSED_MESSAGE } from "@/lib/purchases";
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 interface CartItem {
   product_id: string;
@@ -25,6 +28,11 @@ interface ShippingAddress {
 }
 
 export async function POST(request: Request) {
+  // Purchases are paused: stop before any charge, order, or inventory change
+  if (!PURCHASES_ENABLED) {
+    return NextResponse.json({ error: PURCHASES_PAUSED_MESSAGE }, { status: 503 });
+  }
+
   try {
     const supabase = createClient();
     const {
@@ -35,14 +43,23 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { opaqueData, items, shippingAddress } = (await request.json()) as {
+    const { opaqueData, items, shippingAddress, email } = (await request.json()) as {
       opaqueData: { dataDescriptor: string; dataValue: string };
       items: CartItem[];
       shippingAddress: ShippingAddress;
+      email?: string;
     };
 
     if (!items || items.length === 0) {
       return NextResponse.json({ error: "Cart is empty" }, { status: 400 });
+    }
+
+    const contactEmail = (email || "").trim();
+    if (contactEmail && !EMAIL_REGEX.test(contactEmail)) {
+      return NextResponse.json(
+        { error: "Enter a valid email address for your order confirmation." },
+        { status: 400 }
+      );
     }
 
     if (!opaqueData?.dataDescriptor || !opaqueData?.dataValue) {
@@ -115,7 +132,8 @@ export async function POST(request: Request) {
     const nameParts = (profile?.full_name || "").split(" ");
     const custFirstName = nameParts[0] || shippingAddress.firstName;
     const custLastName = nameParts.slice(1).join(" ") || shippingAddress.lastName;
-    const custEmail = profile?.email || user.email || "";
+    // The email typed at checkout wins; fall back to the account email
+    const custEmail = contactEmail || profile?.email || user.email || "";
 
     // Calculate total in dollars
     const totalCents = items.reduce(
@@ -160,7 +178,7 @@ export async function POST(request: Request) {
         status: "paid",
         total_cents: totalCents,
         authnet_transaction_id: result.transactionId,
-        shipping_address: shippingAddress,
+        shipping_address: { ...shippingAddress, email: custEmail },
       })
       .select("id")
       .single();
@@ -223,7 +241,7 @@ export async function POST(request: Request) {
         items: emailItems,
         total: totalCents,
         shippingAddress: addressStr,
-        customerName: profile?.full_name || "Valued Customer",
+        customerName: profile?.full_name || shippingAddress.firstName || "Valued Customer",
       });
     }
 
