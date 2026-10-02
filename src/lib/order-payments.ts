@@ -82,7 +82,9 @@ export async function applyBankfulResult(
         unit_price_cents: item.unit_price_cents,
         quantity: item.quantity,
       })),
-      shipping.state
+      shipping.state,
+      // The shipping charge quoted when the order was placed (absent on older orders)
+      typeof (shipping as any).shipping_cents === "number" ? (shipping as any).shipping_cents : undefined
     );
     const breakdown = totals.totalCents === order.total_cents ? totals : undefined;
 

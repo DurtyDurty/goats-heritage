@@ -107,10 +107,54 @@ export default function CheckoutPage() {
   }, [isLoaded, items, authenticated, router]);
 
   const hasCigars = items.some((item) => item.category === "cigar");
+  // Shipping estimate for the destination ZIP, refreshed when the ZIP or the cart changes
+  const [shippingQuote, setShippingQuote] = useState<{ cents: number; source: string } | null>(null);
+  const [quoting, setQuoting] = useState(false);
+  const zip5 = /^\d{5}/.test(zip.trim()) ? zip.trim().slice(0, 5) : "";
+  const cartKey = items.map((i) => `${i.product_id}:${i.quantity}`).join(",");
+
+  useEffect(() => {
+    if (!authenticated || !zip5 || !cartKey) {
+      setShippingQuote(null);
+      setQuoting(false);
+      return;
+    }
+    let cancelled = false;
+    setQuoting(true);
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch("/api/shipping/quote", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            zip: zip5,
+            items: cartKey.split(",").map((pair) => {
+              const [product_id, quantity] = pair.split(":");
+              return { product_id, quantity: Number(quantity) };
+            }),
+          }),
+        });
+        const data = await res.json();
+        if (!cancelled) {
+          setShippingQuote(res.ok && typeof data.shippingCents === "number" ? { cents: data.shippingCents, source: data.source } : null);
+        }
+      } catch {
+        if (!cancelled) setShippingQuote(null);
+      } finally {
+        if (!cancelled) setQuoting(false);
+      }
+    }, 400);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [authenticated, zip5, cartKey]);
+
   // Estimate for display. The server recalculates from its own prices before charging.
   const totals = calculateTotals(
     items.map((i) => ({ category: i.category, unit_price_cents: i.price_cents, quantity: i.quantity })),
-    state
+    state,
+    shippingQuote?.cents
   );
 
   const needed = cigarsNeeded(items);
@@ -125,6 +169,7 @@ export default function CheckoutPage() {
     if (dobAge === null) return "That date of birth is not a valid date.";
     if (dobAge < MINIMUM_AGE) return `You must be ${MINIMUM_AGE} or older to place an order.`;
     if (hasCigars && !ageConfirmed) return "You must confirm you are 21 or older to purchase tobacco products.";
+    if (quoting) return "Shipping is still being calculated. Please try again in a moment.";
     return null;
   }
 
@@ -156,10 +201,20 @@ export default function CheckoutPage() {
           dateOfBirth,
           items: items.map((i) => ({ product_id: i.product_id, quantity: i.quantity })),
           shippingAddress: { firstName, lastName, address, city, state, zip, phone },
+          // What the summary is showing, so the server can refuse to charge a different amount
+          shippingCents: totals.shippingCents,
         }),
       });
 
       const data = await res.json();
+
+      // The server's shipping estimate differs from the one shown: update the summary and let them confirm
+      if (res.status === 409 && typeof data.shippingCents === "number") {
+        setShippingQuote({ cents: data.shippingCents, source: data.source });
+        setError(data.error);
+        setLoading(false);
+        return;
+      }
 
       if (!res.ok || !data.redirectUrl) {
         setError(data.error || "Checkout failed");
@@ -417,9 +472,14 @@ export default function CheckoutPage() {
                   <span>{formatPrice(totals.subtotalCents)}</span>
                 </div>
                 <div className="flex justify-between text-[#A3A3A3]">
-                  <span>Shipping</span>
-                  <span className={totals.shippingCents === 0 ? "text-[#22C55E]" : ""}>
-                    {totals.shippingCents === 0 ? "Free" : formatPrice(totals.shippingCents)}
+                  <span>
+                    Shipping
+                    {shippingQuote?.source === "usps" && totals.shippingCents > 0 && (
+                      <span className="ml-1 text-xs">(USPS estimate to {zip5})</span>
+                    )}
+                  </span>
+                  <span className={!quoting && totals.shippingCents === 0 ? "text-[#22C55E]" : ""}>
+                    {quoting ? "Calculating..." : totals.shippingCents === 0 ? "Free" : formatPrice(totals.shippingCents)}
                   </span>
                 </div>
                 {totals.tobaccoTaxCents > 0 && (

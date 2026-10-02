@@ -62,7 +62,20 @@ export interface OrderTotals {
   salesTaxRate: number;
 }
 
-export function calculateTotals(lines: PricedLine[], state: string | null | undefined): OrderTotals {
+/** Shipping when no carrier estimate is available: the flat fee, or free at the threshold. */
+export function defaultShippingCents(subtotalCents: number): number {
+  return subtotalCents === 0 || subtotalCents >= FREE_SHIPPING_THRESHOLD_CENTS ? 0 : SHIPPING_FLAT_CENTS;
+}
+
+/**
+ * @param shippingCents a carrier estimate for this order (see src/lib/shipping.ts).
+ *   Leave undefined to use the flat fee. Free shipping at the threshold always wins.
+ */
+export function calculateTotals(
+  lines: PricedLine[],
+  state: string | null | undefined,
+  shippingCents?: number | null
+): OrderTotals {
   const code = (state || "").trim().toUpperCase();
 
   const subtotalCents = lines.reduce((sum, l) => sum + l.unit_price_cents * l.quantity, 0);
@@ -70,19 +83,20 @@ export function calculateTotals(lines: PricedLine[], state: string | null | unde
     .filter((l) => TOBACCO_CATEGORIES.includes(l.category))
     .reduce((sum, l) => sum + l.unit_price_cents * l.quantity, 0);
 
-  const shippingCents = subtotalCents === 0 || subtotalCents >= FREE_SHIPPING_THRESHOLD_CENTS ? 0 : SHIPPING_FLAT_CENTS;
+  const flatCents = defaultShippingCents(subtotalCents);
+  const shipping = flatCents === 0 || shippingCents == null ? flatCents : Math.max(0, Math.round(shippingCents));
   const tobaccoTaxCents = Math.round(tobaccoSubtotalCents * (TOBACCO_TAX_RATES[code] || 0));
 
   const salesTaxRate = SALES_TAX_RATES[code] || 0;
-  const taxableCents = subtotalCents + tobaccoTaxCents + (SALES_TAX_APPLIES_TO_SHIPPING ? shippingCents : 0);
+  const taxableCents = subtotalCents + tobaccoTaxCents + (SALES_TAX_APPLIES_TO_SHIPPING ? shipping : 0);
   const salesTaxCents = Math.round(taxableCents * salesTaxRate);
 
   return {
     subtotalCents,
-    shippingCents,
+    shippingCents: shipping,
     tobaccoTaxCents,
     salesTaxCents,
-    totalCents: subtotalCents + shippingCents + tobaccoTaxCents + salesTaxCents,
+    totalCents: subtotalCents + shipping + tobaccoTaxCents + salesTaxCents,
     salesTaxRate,
   };
 }

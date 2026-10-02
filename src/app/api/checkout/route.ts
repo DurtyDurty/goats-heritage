@@ -7,7 +7,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { PURCHASES_ENABLED, PURCHASES_PAUSED_MESSAGE } from "@/lib/purchases";
 import { ageFromDob, MINIMUM_AGE } from "@/lib/age";
 import { bankfulConfigured, bankfulEnvironment, createHostedPayment } from "@/lib/bankful";
-import { calculateTotals, cigarsNeeded, MIN_CIGARS_PER_ORDER, type PricedLine } from "@/lib/pricing";
+import { calculateTotals, cigarsNeeded, defaultShippingCents, MIN_CIGARS_PER_ORDER, type PricedLine } from "@/lib/pricing";
+import { quoteShipping, type ShippingLine } from "@/lib/shipping";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -62,11 +63,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Payments are not set up yet. Please try again later." }, { status: 503 });
     }
 
-    const { items, shippingAddress, email, dateOfBirth } = (await request.json()) as {
+    const { items, shippingAddress, email, dateOfBirth, shippingCents: shownShippingCents } = (await request.json()) as {
       items: CartItem[];
       shippingAddress: ShippingAddress;
       email?: string;
       dateOfBirth?: string;
+      /** The shipping charge the customer was shown, so we never charge a different one silently. */
+      shippingCents?: number;
     };
 
     if (!Array.isArray(items) || items.length === 0) {
@@ -94,7 +97,7 @@ export async function POST(request: Request) {
     // Validate products and take prices from the database, never from the browser
     const { data: products, error: productsError } = await adminSupabase
       .from("products")
-      .select("id, name, category, price_cents, inventory_count, is_active")
+      .select("id, name, category, price_cents, weight_oz, inventory_count, is_active")
       .in("id", items.map((i) => i.product_id));
 
     if (productsError || !products) {
@@ -104,6 +107,7 @@ export async function POST(request: Request) {
     const productMap = new Map(products.map((p) => [p.id, p]));
     const lines: { product_id: string; quantity: number; unit_price_cents: number }[] = [];
     const pricedLines: PricedLine[] = [];
+    const shippingLines: ShippingLine[] = [];
 
     for (const item of items) {
       const product = productMap.get(item.product_id);
@@ -115,6 +119,7 @@ export async function POST(request: Request) {
       }
       lines.push({ product_id: product.id, quantity: item.quantity, unit_price_cents: product.price_cents });
       pricedLines.push({ category: product.category, unit_price_cents: product.price_cents, quantity: item.quantity });
+      shippingLines.push({ weight_oz: product.weight_oz, quantity: item.quantity });
     }
 
     if (cigarsNeeded(pricedLines) > 0) {
@@ -124,8 +129,28 @@ export async function POST(request: Request) {
       );
     }
 
+    // Shipping is quoted here, on the server, for the destination ZIP
+    const subtotalCents = pricedLines.reduce((sum, l) => sum + l.unit_price_cents * l.quantity, 0);
+    const shippingQuote = await quoteShipping({
+      destinationZip: shippingAddress.zip,
+      flatCents: defaultShippingCents(subtotalCents),
+      lines: shippingLines,
+    });
+
+    // If the estimate moved since the customer saw it, show them the new total first
+    if (typeof shownShippingCents === "number" && shownShippingCents !== shippingQuote.cents) {
+      return NextResponse.json(
+        {
+          error: "The shipping cost for your address was updated. Please review the new total and continue.",
+          shippingCents: shippingQuote.cents,
+          source: shippingQuote.source,
+        },
+        { status: 409 }
+      );
+    }
+
     // Items + shipping + tax for the destination state. This is the amount charged.
-    const totalCents = calculateTotals(pricedLines, shippingAddress.state).totalCents;
+    const totalCents = calculateTotals(pricedLines, shippingAddress.state, shippingQuote.cents).totalCents;
 
     // Age verification: the date of birth entered at checkout must be valid,
     // 21 or older, and consistent with the one already on the account.
@@ -159,7 +184,13 @@ export async function POST(request: Request) {
         user_id: user.id,
         status: "pending",
         total_cents: totalCents,
-        shipping_address: { ...shippingAddress, email: custEmail, date_of_birth: dateOfBirth },
+        shipping_address: {
+          ...shippingAddress,
+          email: custEmail,
+          date_of_birth: dateOfBirth,
+          shipping_cents: shippingQuote.cents,
+          shipping_source: shippingQuote.source,
+        },
       })
       .select("id")
       .single();
