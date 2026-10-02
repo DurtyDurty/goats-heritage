@@ -16,6 +16,14 @@ import { formatPrice } from "@/lib/types";
 import { createClient } from "@/lib/supabase/client";
 import CardLogos, { CardLogo, detectCardBrand } from "@/components/checkout/CardLogos";
 import { PURCHASES_ENABLED, PURCHASES_PAUSED_MESSAGE } from "@/lib/purchases";
+import { ageFromDob, daysInMonth, MINIMUM_AGE } from "@/lib/age";
+
+const MONTHS = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+];
+const CURRENT_YEAR = new Date().getFullYear();
+const BIRTH_YEARS = Array.from({ length: 100 }, (_, i) => CURRENT_YEAR - i);
 
 const US_STATES = [
   "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "DC", "FL", "GA", "HI", "ID", "IL", "IN", "IA", "KS",
@@ -86,6 +94,16 @@ export default function CheckoutPage() {
   const [zip, setZip] = useState("");
   const [phone, setPhone] = useState("");
 
+  // Date of birth
+  const [dobMonth, setDobMonth] = useState("");
+  const [dobDay, setDobDay] = useState("");
+  const [dobYear, setDobYear] = useState("");
+
+  const dobComplete = Boolean(dobMonth && dobDay && dobYear);
+  const dateOfBirth = dobComplete ? `${dobYear}-${dobMonth.padStart(2, "0")}-${dobDay.padStart(2, "0")}` : "";
+  const dobAge = dobComplete ? ageFromDob(dateOfBirth) : null;
+  const dobDays = Array.from({ length: daysInMonth(parseInt(dobMonth, 10) || 1, parseInt(dobYear, 10) || 0) }, (_, i) => i + 1);
+
   // Card fields (digits only; formatted for display)
   const [cardDigits, setCardDigits] = useState("");
   const [expDigits, setExpDigits] = useState("");
@@ -138,6 +156,9 @@ export default function CheckoutPage() {
     if (!state) return "Select your state.";
     if (!/^\d{5}(-\d{4})?$/.test(zip.trim())) return "Enter a valid ZIP code.";
     if (phone.replace(/\D/g, "").length < 10) return "Enter a valid phone number.";
+    if (!dobComplete) return "Select your full date of birth to verify your age.";
+    if (dobAge === null) return "That date of birth is not a valid date.";
+    if (dobAge < MINIMUM_AGE) return `You must be ${MINIMUM_AGE} or older to place an order.`;
     if (cardDigits.length !== cardMaxLength || !luhnValid(cardDigits)) return "Check your card number.";
     if (expDigits.length !== 4) return "Enter your card's expiration date as MM / YY.";
     const month = parseInt(expDigits.slice(0, 2), 10);
@@ -202,6 +223,7 @@ export default function CheckoutPage() {
           body: JSON.stringify({
             opaqueData: response.opaqueData,
             email: email.trim(),
+            dateOfBirth,
             items: items.map((i) => ({
               product_id: i.product_id,
               name: i.name,
@@ -330,10 +352,81 @@ export default function CheckoutPage() {
               </div>
             </div>
 
+            {/* Age verification */}
+            <div className="rounded-xl border border-[#262626] bg-[#141414] p-6">
+              <SectionHeading step={3} icon={<ShieldCheck className="h-4 w-4 text-[#C8A84E]" />} title="Age verification" />
+              <fieldset className="mt-5">
+                <legend className={labelClass}>Date of birth</legend>
+                <div className="grid grid-cols-3 gap-3">
+                  <select
+                    aria-label="Birth month"
+                    required
+                    autoComplete="bday-month"
+                    value={dobMonth}
+                    onChange={(e) => {
+                      setDobMonth(e.target.value);
+                      // Drop a day that the new month does not have (e.g. the 31st)
+                      const max = daysInMonth(parseInt(e.target.value, 10) || 1, parseInt(dobYear, 10) || 0);
+                      if (parseInt(dobDay, 10) > max) setDobDay("");
+                    }}
+                    className={inputClass}
+                  >
+                    <option value="">Month</option>
+                    {MONTHS.map((m, i) => (
+                      <option key={m} value={String(i + 1)}>{m}</option>
+                    ))}
+                  </select>
+                  <select
+                    aria-label="Birth day"
+                    required
+                    autoComplete="bday-day"
+                    value={dobDay}
+                    onChange={(e) => setDobDay(e.target.value)}
+                    className={inputClass}
+                  >
+                    <option value="">Day</option>
+                    {dobDays.map((d) => (
+                      <option key={d} value={String(d)}>{d}</option>
+                    ))}
+                  </select>
+                  <select
+                    aria-label="Birth year"
+                    required
+                    autoComplete="bday-year"
+                    value={dobYear}
+                    onChange={(e) => {
+                      setDobYear(e.target.value);
+                      const max = daysInMonth(parseInt(dobMonth, 10) || 1, parseInt(e.target.value, 10) || 0);
+                      if (parseInt(dobDay, 10) > max) setDobDay("");
+                    }}
+                    className={inputClass}
+                  >
+                    <option value="">Year</option>
+                    {BIRTH_YEARS.map((y) => (
+                      <option key={y} value={String(y)}>{y}</option>
+                    ))}
+                  </select>
+                </div>
+                {dobComplete && dobAge !== null && dobAge < MINIMUM_AGE ? (
+                  <p role="alert" className="mt-3 text-xs text-[#EF4444]">
+                    You must be {MINIMUM_AGE} or older to place an order.
+                  </p>
+                ) : dobComplete && dobAge !== null ? (
+                  <p className="mt-3 flex items-center gap-1.5 text-xs text-[#22C55E]">
+                    <ShieldCheck className="h-3.5 w-3.5" /> Age confirmed, {MINIMUM_AGE} or older.
+                  </p>
+                ) : (
+                  <p className="mt-3 text-xs text-[#A3A3A3]">
+                    You must be {MINIMUM_AGE} or older to order. An adult signature and photo ID are required on delivery.
+                  </p>
+                )}
+              </fieldset>
+            </div>
+
             {/* Payment */}
             <div className="rounded-xl border border-[#262626] bg-[#141414] p-6">
               <SectionHeading
-                step={3}
+                step={4}
                 icon={<CreditCard className="h-4 w-4 text-[#C8A84E]" />}
                 title="Payment"
                 aside={<CardLogos active={brand} />}

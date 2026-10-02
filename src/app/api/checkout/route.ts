@@ -7,6 +7,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { createTransaction } from "@/lib/authnet/helpers";
 import { sendOrderConfirmation } from "@/lib/email/send";
 import { PURCHASES_ENABLED, PURCHASES_PAUSED_MESSAGE } from "@/lib/purchases";
+import { ageFromDob, MINIMUM_AGE } from "@/lib/age";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -43,11 +44,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { opaqueData, items, shippingAddress, email } = (await request.json()) as {
+    const { opaqueData, items, shippingAddress, email, dateOfBirth } = (await request.json()) as {
       opaqueData: { dataDescriptor: string; dataValue: string };
       items: CartItem[];
       shippingAddress: ShippingAddress;
       email?: string;
+      dateOfBirth?: string;
     };
 
     if (!items || items.length === 0) {
@@ -102,24 +104,43 @@ export async function POST(request: Request) {
       }
     }
 
-    // Check age verification for cigar products
-    const hasCigars = products.some((p) => p.category === "cigar");
-    if (hasCigars) {
-      const { data: ageProfile } = await adminSupabase
-        .from("profiles")
-        .select("age_verified")
-        .eq("id", user.id)
-        .single();
+    // Age verification: the date of birth entered at checkout must be valid,
+    // 21 or older, and consistent with the one already on the account.
+    const age = ageFromDob(dateOfBirth || "");
+    if (age === null) {
+      return NextResponse.json(
+        { error: "Enter your full date of birth to verify your age." },
+        { status: 400 }
+      );
+    }
+    if (age < MINIMUM_AGE) {
+      return NextResponse.json(
+        { error: `You must be ${MINIMUM_AGE} or older to place an order.` },
+        { status: 403 }
+      );
+    }
 
-      if (!ageProfile?.age_verified) {
-        return NextResponse.json(
-          {
-            error:
-              "Age verification required to purchase tobacco products. Please verify your age in your account settings.",
-          },
-          { status: 403 }
-        );
-      }
+    const { data: ageProfile } = await adminSupabase
+      .from("profiles")
+      .select("date_of_birth, age_verified")
+      .eq("id", user.id)
+      .single();
+
+    if (ageProfile?.date_of_birth && ageProfile.date_of_birth !== dateOfBirth) {
+      return NextResponse.json(
+        {
+          error:
+            "The date of birth entered does not match the one on your account. Contact us at contact@goatsheritage.com if it needs correcting.",
+        },
+        { status: 403 }
+      );
+    }
+
+    if (!ageProfile?.date_of_birth || !ageProfile.age_verified) {
+      await adminSupabase
+        .from("profiles")
+        .update({ date_of_birth: dateOfBirth, age_verified: true })
+        .eq("id", user.id);
     }
 
     // Get customer info from profile
@@ -178,7 +199,7 @@ export async function POST(request: Request) {
         status: "paid",
         total_cents: totalCents,
         authnet_transaction_id: result.transactionId,
-        shipping_address: { ...shippingAddress, email: custEmail },
+        shipping_address: { ...shippingAddress, email: custEmail, date_of_birth: dateOfBirth },
       })
       .select("id")
       .single();
