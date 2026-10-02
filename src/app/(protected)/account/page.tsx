@@ -38,12 +38,35 @@ export default async function AccountPage() {
               </span>
             </div>
             <div className="flex justify-between">
+              <span className="text-[#A3A3A3]">Date of Birth</span>
+              <span className="text-[#F5F5F5]">
+                {profile?.date_of_birth
+                  ? new Date(`${profile.date_of_birth}T00:00:00`).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })
+                  : "Not set"}
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
               <span className="text-[#A3A3A3]">Age Verified</span>
               <span className={profile?.age_verified ? "text-[#22C55E]" : "text-[#F59E0B]"}>
                 {profile?.age_verified ? "Yes" : "No"}
               </span>
             </div>
           </div>
+
+          {!profile?.age_verified && (
+            <div className="mt-5 rounded-lg border border-[#F59E0B]/30 bg-[#F59E0B]/5 p-4">
+              <p className="text-sm text-[#F5F5F5]">Your age is not verified yet.</p>
+              <p className="mt-1 text-xs text-[#A3A3A3]">
+                Add your date of birth to order tobacco products. You must be 21 or older.
+              </p>
+              <Link
+                href="/auth/verify-age"
+                className="mt-3 inline-block rounded-lg bg-[#C8A84E] px-5 py-2 text-sm font-bold text-black transition-colors hover:bg-[#E8D48B]"
+              >
+                Verify Age
+              </Link>
+            </div>
+          )}
 
           <div className="mt-6 flex flex-col gap-3">
             <Link

@@ -5,6 +5,7 @@ import Navbar from "./Navbar";
 import Footer from "./Footer";
 import CartDrawer from "@/components/shop/CartDrawer";
 import AgeGateModal from "./AgeGateModal";
+import ProfileCompletionModal from "./ProfileCompletionModal";
 
 export default function PublicShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -17,6 +18,7 @@ export default function PublicShell({ children }: { children: React.ReactNode })
   return (
     <>
       <AgeGateModal />
+      <ProfileCompletionModal />
       <Navbar />
       <CartDrawer />
       <main className="min-h-screen">{children}</main>
