@@ -56,7 +56,7 @@ export default function ShippingPage() {
                 <tbody>
                   <tr className="border-b border-neutral-800/50">
                     <td className="px-4 py-3">Under $75.00</td>
-                    <td className="px-4 py-3">$4.95 flat rate</td>
+                    <td className="px-4 py-3">$7.99 flat rate</td>
                   </tr>
                   <tr>
                     <td className="px-4 py-3">$75.00 and above</td>

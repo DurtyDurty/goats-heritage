@@ -5,7 +5,7 @@
 // These are BASELINE rates. Change the numbers here and every place stays in sync.
 
 /** Flat shipping fee, waived at the free-shipping threshold (matches the Shipping Policy). */
-export const SHIPPING_FLAT_CENTS = 495;
+export const SHIPPING_FLAT_CENTS = 799;
 export const FREE_SHIPPING_THRESHOLD_CENTS = 7500;
 
 /**
