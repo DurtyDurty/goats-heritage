@@ -82,9 +82,7 @@ export default function AboutPage() {
           <h2 className="text-3xl font-bold md:text-4xl">Join the <span className="text-[#C8A84E]">Heritage</span></h2>
           <p className="mt-4 text-[#A3A3A3]">Be part of a community that celebrates the craft.</p>
           <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <a href="/shop" className="rounded-lg bg-[#C8A84E] px-8 py-4 font-bold text-black transition-colors hover:bg-[#E8D48B]">Shop Collection</a>
-            <a href="/membership" className="rounded-lg border border-[#C8A84E] px-8 py-4 text-[#C8A84E] transition-colors hover:bg-[#C8A84E]/10">Join the Club</a>
-          </div>
+            <a href="/shop" className="rounded-lg bg-[#C8A84E] px-8 py-4 font-bold text-black transition-colors hover:bg-[#E8D48B]">Shop Collection</a>          </div>
         </div>
       </section>
     </div>

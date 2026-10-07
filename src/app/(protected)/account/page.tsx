@@ -76,12 +76,6 @@ export default async function AccountPage() {
               My Orders
             </Link>
             <Link
-              href="/account/subscription"
-              className="block w-full rounded-lg border border-[#C8A84E] py-3 text-center text-sm font-medium text-[#C8A84E] transition-colors hover:bg-[#C8A84E]/10"
-            >
-              Membership
-            </Link>
-            <Link
               href="/account/edit"
               className="block w-full rounded-lg border border-[#262626] py-3 text-center text-sm font-medium text-[#A3A3A3] transition-colors hover:bg-[#1A1A1A]"
             >

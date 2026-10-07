@@ -64,12 +64,6 @@ export default async function HomePage() {
             >
               Shop Collection
             </Link>
-            <Link
-              href="/membership"
-              className="rounded-lg border border-[#C8A84E] px-8 py-4 text-[#C8A84E] transition-colors hover:bg-[#C8A84E]/10"
-            >
-              Join the Club
-            </Link>
           </div>
         </div>
       </section>

@@ -20,6 +20,16 @@ const nextConfig = {
       },
     ],
   },
+  // Memberships are switched off for now: the pages still exist but are unreachable.
+  // Delete these redirects (and MEMBERSHIPS_ENABLED in src/lib/purchases.ts) to bring them back.
+  async redirects() {
+    return [
+      { source: "/membership", destination: "/", permanent: false },
+      { source: "/membership/:path*", destination: "/", permanent: false },
+      { source: "/account/membership", destination: "/account", permanent: false },
+      { source: "/account/subscription", destination: "/account", permanent: false },
+    ];
+  },
   async headers() {
     return [
       {

@@ -4,7 +4,6 @@ import NewsletterSignup from "./NewsletterSignup";
 
 const quickLinks = [
   { href: "/shop", label: "Shop" },
-  { href: "/membership", label: "Membership" },
   { href: "/events", label: "Events" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
