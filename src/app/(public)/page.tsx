@@ -110,67 +110,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── Membership Teaser ── */}
-      <section className="bg-[#141414] py-24">
-        <div className="mx-auto grid max-w-7xl gap-12 px-4 sm:px-6 lg:grid-cols-2 lg:items-center lg:px-8">
-          {/* Left — text */}
-          <FadeIn>
-          <div>
-            <p className="text-xs font-medium uppercase tracking-[0.3em] text-[#C8A84E]">
-              The Inner Circle
-            </p>
-            <h2 className="mt-4 text-3xl font-bold md:text-4xl">
-              Join the <span className="text-[#C8A84E]">Club</span>
-            </h2>
-            <div className="mt-3 h-px w-16 bg-[#C8A84E]/40" />
-            <p className="mt-6 leading-relaxed text-[#A3A3A3]">
-              Monthly curated cigar boxes delivered to your door. Members get
-              early access to limited releases, exclusive merch drops, VIP event
-              invites, and a community of like-minded aficionados.
-            </p>
-            <ul className="mt-6 space-y-3 text-sm text-[#A3A3A3]">
-              <li className="flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#C8A84E]" />
-                Monthly premium cigar selection
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#C8A84E]" />
-                Exclusive member-only merchandise
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#C8A84E]" />
-                VIP access to private events
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#C8A84E]" />
-                10% off all shop purchases
-              </li>
-            </ul>
-            <Link
-              href="/membership"
-              className="mt-8 inline-block rounded-lg bg-[#C8A84E] px-8 py-3 font-bold text-black transition-colors hover:bg-[#E8D48B]"
-            >
-              Learn More
-            </Link>
-          </div>
-          </FadeIn>
-
-          {/* Right — lifestyle image */}
-          <FadeIn delay={200}>
-          <div className="flex items-center justify-center">
-            <div className="relative aspect-[4/5] w-full max-w-sm overflow-hidden rounded-xl border border-[#C8A84E]/20">
-              <Image
-                src="https://images.unsplash.com/photo-1592862080230-fe0a3b380f21?w=800&q=80"
-                alt="Premium cigar and whiskey"
-                fill
-                className="object-cover"
-              />
-            </div>
-          </div>
-          </FadeIn>
-        </div>
-      </section>
-
       {/* ── Experience & Events Slideshow ── */}
       <section className="py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
