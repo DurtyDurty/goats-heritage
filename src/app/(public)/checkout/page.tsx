@@ -490,7 +490,7 @@ export default function CheckoutPage() {
                 )}
                 <div className="flex justify-between text-[#A3A3A3]">
                   <span>
-                    Sales tax{totals.salesTaxRate > 0 && ` (${state} ${(totals.salesTaxRate * 100).toFixed(totals.salesTaxRate * 100 % 1 === 0 ? 0 : 2)}%)`}
+                    Sales tax{totals.salesTaxRate > 0 && ` (${state} ${parseFloat((totals.salesTaxRate * 100).toFixed(3))}%)`}
                   </span>
                   <span>{state ? formatPrice(totals.salesTaxCents) : "Select state"}</span>
                 </div>
