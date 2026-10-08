@@ -16,7 +16,7 @@ export async function GET(request: Request) {
   const supabase = createAdminClient();
   let query = supabase
     .from("orders")
-    .select("*, profiles(full_name, email), order_items(id)")
+    .select("*, profiles(full_name, email), order_items(id, quantity, unit_price_cents, products(name))")
     .order("created_at", { ascending: false });
 
   if (status && status !== "all") {
@@ -48,8 +48,10 @@ export async function PATCH(request: Request) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  // Send shipping update email when order is marked as shipped with tracking
-  if (status === "shipped" && tracking_number && data?.user_id) {
+  // Send the shipping update email once the order is both shipped and has tracking.
+  // The admin page saves status and tracking as separate changes, so check the saved row.
+  const shippedNow = status === "shipped" || tracking_number;
+  if (shippedNow && data?.status === "shipped" && data?.tracking_number && data?.user_id) {
     const { data: profile } = await supabase
       .from("profiles")
       .select("email, full_name")
@@ -59,7 +61,7 @@ export async function PATCH(request: Request) {
     if (profile?.email) {
       await sendShippingUpdate(profile.email, {
         orderNumber: data.id,
-        trackingNumber: tracking_number,
+        trackingNumber: data.tracking_number,
         customerName: profile.full_name || "Valued Customer",
       });
     }
