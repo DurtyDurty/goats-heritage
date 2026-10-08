@@ -265,15 +265,6 @@ export default function CheckoutPage() {
           </div>
         )}
 
-        {!PURCHASES_ENABLED && isAdmin && (
-          <div role="status" className="mt-6 rounded-xl border border-[#3B82F6]/40 bg-[#3B82F6]/5 px-5 py-4">
-            <p className="font-semibold text-[#F5F5F5]">Admin test mode</p>
-            <p className="mt-1 text-sm text-[#A3A3A3]">
-              Ordering is paused for customers. As an admin you can place test orders through the payment sandbox. Use a test card. No real card is charged.
-            </p>
-          </div>
-        )}
-
         <form onSubmit={handleSubmit} className="mt-8 grid gap-8 lg:grid-cols-5">
           {/* ── Left: details ── */}
           <div className="space-y-6 lg:col-span-3">

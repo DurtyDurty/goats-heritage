@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { PURCHASES_ENABLED, PURCHASES_PAUSED_MESSAGE } from "@/lib/purchases";
 import { ageFromDob, MINIMUM_AGE } from "@/lib/age";
-import { bankfulConfigured, bankfulEnvironment, createHostedPayment } from "@/lib/bankful";
+import { bankfulConfigured, createHostedPayment } from "@/lib/bankful";
 import { calculateTotals, cigarsNeeded, defaultShippingCents, MIN_CIGARS_PER_ORDER, type PricedLine } from "@/lib/pricing";
 import { quoteShipping, type ShippingLine } from "@/lib/shipping";
 
@@ -50,13 +50,10 @@ export async function POST(request: Request) {
       .eq("id", user.id)
       .single();
 
-    // Purchases are paused for customers. Admins can still place test orders,
-    // and only while the gateway is on the sandbox, so no real card is charged.
-    if (!PURCHASES_ENABLED) {
-      const adminSandboxTest = profile?.role === "admin" && bankfulEnvironment() === "sandbox";
-      if (!adminSandboxTest) {
-        return NextResponse.json({ error: PURCHASES_PAUSED_MESSAGE }, { status: 503 });
-      }
+    // Purchases are paused for customers. Admins can still place orders to test the
+    // gateway; on the live gateway these are real charges.
+    if (!PURCHASES_ENABLED && profile?.role !== "admin") {
+      return NextResponse.json({ error: PURCHASES_PAUSED_MESSAGE }, { status: 503 });
     }
 
     if (!bankfulConfigured()) {
