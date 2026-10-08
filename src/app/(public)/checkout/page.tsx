@@ -56,7 +56,7 @@ export default function CheckoutPage() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [pageReady, setPageReady] = useState(false);
 
-  // Customers can order only when purchases are switched on; admins can always run sandbox tests
+  // Customers can order only when purchases are switched on; admins can always place test orders
   const canPurchase = PURCHASES_ENABLED || isAdmin;
 
   // Contact
@@ -258,9 +258,9 @@ export default function CheckoutPage() {
 
         {!PURCHASES_ENABLED && !isAdmin && (
           <div role="status" className="mt-6 rounded-xl border border-[#C8A84E]/40 bg-[#C8A84E]/5 px-5 py-4">
-            <p className="font-semibold text-[#E8D48B]">Online ordering opens soon</p>
+            <p className="font-semibold text-[#E8D48B]">Orders are paused during maintenance</p>
             <p className="mt-1 text-sm text-[#A3A3A3]">
-              We are not taking payments yet, so orders cannot be placed and your card will not be charged.
+              Orders cannot be placed right now and your card will not be charged. Please check back soon.
             </p>
           </div>
         )}

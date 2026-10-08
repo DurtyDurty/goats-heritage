@@ -9,4 +9,4 @@ export const PURCHASES_ENABLED = process.env.NEXT_PUBLIC_PURCHASES_ENABLED === "
 export const MEMBERSHIPS_ENABLED = false;
 
 export const PURCHASES_PAUSED_MESSAGE =
-  "Online ordering is not open yet. No payment was taken and your card was not charged.";
+  "Orders are paused during maintenance. No payment was taken and your card was not charged.";
