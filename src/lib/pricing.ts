@@ -16,65 +16,14 @@ export const FREE_SHIPPING_THRESHOLD_CENTS = 7500;
 export const MIN_CIGARS_PER_ORDER = 3;
 
 /**
- * Sales tax by destination state (2-letter code). States not listed are charged no tax
- * (AK, DE, MT, NH and OR have no state sales tax).
- * These are the STATE rates only. County and city taxes, which many states add on top
- * (FL counties add 0.5%-1.5%), are NOT included. UT and VA include their mandatory
- * statewide local portion. Confirm the rates with your accountant before relying on them.
+ * Sales tax by destination state (2-letter code). States not listed are charged no tax.
+ * FL: 6% is the state rate only. Counties add a 0.5%-1.5% surtax that is NOT included.
  */
 export const SALES_TAX_RATES: Record<string, number> = {
-  AL: 0.04,
-  AZ: 0.056,
-  AR: 0.065,
-  CA: 0.0725,
-  CO: 0.029,
-  CT: 0.0635,
-  DC: 0.06,
   FL: 0.06,
-  GA: 0.04,
-  HI: 0.04,
-  ID: 0.06,
-  IL: 0.0625,
-  IN: 0.07,
-  IA: 0.06,
-  KS: 0.065,
-  KY: 0.06,
-  LA: 0.05,
-  ME: 0.055,
-  MD: 0.06,
-  MA: 0.0625,
-  MI: 0.06,
-  MN: 0.06875,
-  MS: 0.07,
-  MO: 0.04225,
-  NE: 0.055,
-  NV: 0.0685,
-  NJ: 0.06625,
-  NM: 0.04875,
-  NY: 0.04,
-  NC: 0.0475,
-  ND: 0.05,
-  OH: 0.0575,
-  OK: 0.045,
-  PA: 0.06,
-  RI: 0.07,
-  SC: 0.06,
-  SD: 0.042,
-  TN: 0.07,
-  TX: 0.0625,
-  UT: 0.061,
-  VT: 0.06,
-  VA: 0.053,
-  WA: 0.065,
-  WV: 0.06,
-  WI: 0.05,
-  WY: 0.04,
 };
 
-/**
- * Florida taxes delivery charges the customer cannot opt out of, so shipping is in the
- * taxable amount. Applied to every state for simplicity; some states do not tax shipping.
- */
+/** Florida taxes delivery charges the customer cannot opt out of, so shipping is in the taxable amount. */
 export const SALES_TAX_APPLIES_TO_SHIPPING = true;
 
 /**

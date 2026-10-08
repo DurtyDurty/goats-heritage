@@ -473,7 +473,7 @@ export default function CheckoutPage() {
                 </div>
                 <div className="flex justify-between text-[#A3A3A3]">
                   <span>
-                    Shipping
+                    Shipping &amp; handling
                     {shippingQuote?.source === "usps" && totals.shippingCents > 0 && (
                       <span className="ml-1 text-xs">(USPS estimate to {zip5})</span>
                     )}
@@ -488,12 +488,15 @@ export default function CheckoutPage() {
                     <span>{formatPrice(totals.tobaccoTaxCents)}</span>
                   </div>
                 )}
-                <div className="flex justify-between text-[#A3A3A3]">
-                  <span>
-                    Sales tax{totals.salesTaxRate > 0 && ` (${state} ${parseFloat((totals.salesTaxRate * 100).toFixed(3))}%)`}
-                  </span>
-                  <span>{state ? formatPrice(totals.salesTaxCents) : "Select state"}</span>
-                </div>
+                {/* Sales tax is collected only where a rate is set (Florida) */}
+                {totals.salesTaxRate > 0 && (
+                  <div className="flex justify-between text-[#A3A3A3]">
+                    <span>
+                      Sales tax ({state} {(totals.salesTaxRate * 100).toFixed(totals.salesTaxRate * 100 % 1 === 0 ? 0 : 2)}%)
+                    </span>
+                    <span>{formatPrice(totals.salesTaxCents)}</span>
+                  </div>
+                )}
                 {totals.shippingCents > 0 && (
                   <p className="text-xs text-[#A3A3A3]">
                     Add {formatPrice(FREE_SHIPPING_THRESHOLD_CENTS - totals.subtotalCents)} more for free shipping.

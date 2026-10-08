@@ -32,7 +32,7 @@ export function orderConfirmation({
   const dollars = (cents: number) => `$${(cents / 100).toFixed(2)}`;
   const breakdownRows = breakdown
     ? costRow("Subtotal", dollars(breakdown.subtotalCents)) +
-      costRow("Shipping", breakdown.shippingCents === 0 ? "Free" : dollars(breakdown.shippingCents)) +
+      costRow("Shipping &amp; handling",breakdown.shippingCents === 0 ? "Free" : dollars(breakdown.shippingCents)) +
       (breakdown.tobaccoTaxCents > 0 ? costRow("Tobacco tax", dollars(breakdown.tobaccoTaxCents)) : "") +
       (breakdown.salesTaxCents > 0 ? costRow("Sales tax", dollars(breakdown.salesTaxCents)) : "")
     : "";
