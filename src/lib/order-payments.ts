@@ -69,7 +69,26 @@ export async function applyBankfulResult(
 
   for (const item of items || []) {
     if (!item.product_id) continue;
+    const { data: product } = await db
+      .from("products")
+      .select("inventory_count")
+      .eq("id", item.product_id)
+      .maybeSingle();
     await db.rpc("decrement_inventory", { p_product_id: item.product_id, p_quantity: item.quantity });
+
+    // Record the sale in the inventory movement history (admin Inventory tab)
+    const previousCount = product?.inventory_count ?? 0;
+    const { error: movementError } = await db.from("inventory_movements").insert({
+      product_id: item.product_id,
+      type: "sale",
+      quantity: -item.quantity,
+      previous_count: previousCount,
+      new_count: Math.max(previousCount - item.quantity, 0),
+      notes: `Order ${order.id.slice(0, 8)}`,
+    });
+    if (movementError) {
+      console.error(`Order ${order.id}: stock updated but the movement was not logged:`, movementError.message);
+    }
   }
 
   const shipping = (order.shipping_address || {}) as Record<string, string>;
