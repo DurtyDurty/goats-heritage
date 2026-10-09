@@ -18,7 +18,7 @@ export async function GET() {
 
   const { data: movements } = await supabase
     .from("inventory_movements")
-    .select("*, products(name)")
+    .select("*, products(name), orders(status)")
     .order("created_at", { ascending: false })
     .limit(50);
 

@@ -85,6 +85,7 @@ export async function applyBankfulResult(
       previous_count: previousCount,
       new_count: Math.max(previousCount - item.quantity, 0),
       notes: `Order ${order.id.slice(0, 8)}`,
+      order_id: order.id,
     });
     if (movementError) {
       console.error(`Order ${order.id}: stock updated but the movement was not logged:`, movementError.message);

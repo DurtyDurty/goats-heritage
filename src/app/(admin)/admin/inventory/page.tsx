@@ -31,7 +31,18 @@ interface Movement {
   notes: string | null;
   created_at: string;
   products: { name: string };
+  /** The website order behind a sale movement, when there is one. */
+  orders: { status: string } | null;
 }
+
+// Fulfilment badge for sale movements. Follows the order's status, so marking the
+// order shipped on the Orders page updates it here.
+const fulfilmentBadges: Record<string, { label: string; className: string }> = {
+  paid: { label: "Pending to ship", className: "bg-[#F59E0B]/10 text-[#F59E0B]" },
+  shipped: { label: "Shipped", className: "bg-[#3B82F6]/10 text-[#3B82F6]" },
+  delivered: { label: "Delivered", className: "bg-[#22C55E]/10 text-[#22C55E]" },
+  cancelled: { label: "Order cancelled", className: "bg-[#EF4444]/10 text-[#EF4444]" },
+};
 
 interface ProductFinancials {
   id: string;
@@ -503,6 +514,11 @@ export default function AdminInventoryPage() {
                     <td className="px-4 py-3 text-[#F5F5F5]">{m.products?.name || "—"}</td>
                     <td className="px-4 py-3">
                       <span className={`rounded-full px-2 py-0.5 text-xs font-medium capitalize ${typeColors[m.type] || ""}`}>{m.type}</span>
+                      {m.orders && fulfilmentBadges[m.orders.status] && (
+                        <span className={`ml-2 whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-medium ${fulfilmentBadges[m.orders.status].className}`}>
+                          {fulfilmentBadges[m.orders.status].label}
+                        </span>
+                      )}
                     </td>
                     <td className={`px-4 py-3 font-mono ${m.quantity > 0 ? "text-[#22C55E]" : "text-[#EF4444]"}`}>
                       {m.quantity > 0 ? `+${m.quantity}` : m.quantity}
