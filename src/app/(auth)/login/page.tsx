@@ -6,9 +6,9 @@ import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-// Google sign-in is hidden until the Google provider is enabled in Supabase
-// (Authentication > Sign In / Providers). Set to true once it is.
-const GOOGLE_SIGN_IN_ENABLED = false;
+// Needs the Google provider enabled in Supabase (Authentication > Sign In / Providers).
+// Set to false to hide the button.
+const GOOGLE_SIGN_IN_ENABLED = true;
 
 function LoginForm() {
   const router = useRouter();
