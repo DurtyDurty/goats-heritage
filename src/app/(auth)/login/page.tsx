@@ -6,6 +6,10 @@ import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
+// Google sign-in is hidden until the Google provider is enabled in Supabase
+// (Authentication > Sign In / Providers). Set to true once it is.
+const GOOGLE_SIGN_IN_ENABLED = false;
+
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -102,6 +106,8 @@ function LoginForm() {
         </Link>
       </form>
 
+      {GOOGLE_SIGN_IN_ENABLED && (
+      <>
       <div className="my-6 flex items-center gap-4">
         <div className="h-px flex-1 bg-[#262626]" />
         <span className="text-xs text-[#A3A3A3]">or</span>
@@ -120,6 +126,8 @@ function LoginForm() {
         </svg>
         Continue with Google
       </button>
+      </>
+      )}
 
       <p className="mt-6 text-center text-sm text-[#A3A3A3]">
         Don&apos;t have an account?{" "}
