@@ -23,7 +23,7 @@ interface Order {
   payment_reference?: string | null;
   shipping_address: Record<string, any> | null;
   profiles: { full_name: string | null; email: string | null };
-  order_items: { id: string; quantity: number; unit_price_cents: number; products: { name: string } | null }[];
+  order_items: { id: string; quantity: number; unit_price_cents: number; is_preorder: boolean; products: { name: string } | null }[];
 }
 
 const dollars = (cents: number) => `$${(cents / 100).toFixed(2)}`;
@@ -124,6 +124,9 @@ export default function AdminOrdersPage() {
                   </td>
                   <td className="px-4 py-3 text-[#A3A3A3]">
                     {(o.order_items || []).reduce((sum, i) => sum + i.quantity, 0)}
+                    {(o.order_items || []).some((i) => i.is_preorder) && (
+                      <span className="ml-2 rounded-full bg-[#C8A84E]/10 px-2 py-0.5 text-xs font-medium text-[#C8A84E]">Pre-order</span>
+                    )}
                   </td>
                   <td className="px-4 py-3 text-[#F5F5F5]">
                     ${(o.total_cents / 100).toFixed(2)}
@@ -170,7 +173,10 @@ export default function AdminOrdersPage() {
                           <ul className="mt-2 space-y-1 text-[#F5F5F5]">
                             {(o.order_items || []).map((i) => (
                               <li key={i.id} className="flex justify-between gap-4">
-                                <span>{i.quantity} × {i.products?.name || "Removed product"}</span>
+                                <span>
+                                  {i.quantity} × {i.products?.name || "Removed product"}
+                                  {i.is_preorder && <span className="ml-2 rounded-full bg-[#C8A84E]/10 px-2 py-0.5 text-xs font-medium text-[#C8A84E]">Pre-order</span>}
+                                </span>
                                 <span className="text-[#A3A3A3]">{dollars(i.unit_price_cents * i.quantity)}</span>
                               </li>
                             ))}

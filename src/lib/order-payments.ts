@@ -64,11 +64,14 @@ export async function applyBankfulResult(
 
   const { data: items } = await db
     .from("order_items")
-    .select("product_id, quantity, unit_price_cents, products(name, category)")
+    .select("product_id, quantity, unit_price_cents, is_preorder, products(name, category)")
     .eq("order_id", order.id);
 
   for (const item of items || []) {
     if (!item.product_id) continue;
+    // Pre-order lines are sold ahead of stock, so there is nothing to deduct yet.
+    // Admin > Products shows how many units are owed.
+    if (item.is_preorder) continue;
     const { data: product } = await db
       .from("products")
       .select("inventory_count")
@@ -112,7 +115,7 @@ export async function applyBankfulResult(
       breakdown,
       orderNumber: order.id,
       items: (items || []).map((item: any) => ({
-        name: item.products?.name || "Item",
+        name: (item.products?.name || "Item") + (item.is_preorder ? " (pre-order, ships when available)" : ""),
         qty: item.quantity,
         price: item.unit_price_cents,
       })),

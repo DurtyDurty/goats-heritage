@@ -15,6 +15,8 @@ interface Product {
   inventory_count: number;
   is_active: boolean;
   is_member_exclusive: boolean;
+  is_preorder?: boolean;
+  preorder_note?: string | null;
   metadata: Record<string, string>;
 }
 
@@ -29,6 +31,8 @@ const emptyProduct: Product = {
   inventory_count: 0,
   is_active: true,
   is_member_exclusive: false,
+  is_preorder: false,
+  preorder_note: "",
   metadata: {},
 };
 
@@ -273,6 +277,34 @@ export default function ProductForm({ product, open, onClose, onSaved }: Props) 
               />
               Members Only
             </label>
+          </div>
+
+          {/* Pre-order */}
+          <div className="rounded-lg border border-[#262626] p-3">
+            <label className="flex items-center gap-2 text-sm text-[#F5F5F5]">
+              <input
+                type="checkbox"
+                checked={!!form.is_preorder}
+                onChange={(e) => setForm((f) => ({ ...f, is_preorder: e.target.checked }))}
+                className="accent-[#C8A84E]"
+              />
+              Pre-order
+            </label>
+            <p className="mt-1 text-xs text-[#A3A3A3]">
+              Customers can buy this even with 0 in stock. They are charged at checkout and it ships when stock arrives.
+            </p>
+            {form.is_preorder && (
+              <div className="mt-3">
+                <label className="mb-1 block text-xs text-[#A3A3A3]">Message to customers (optional)</label>
+                <input
+                  value={form.preorder_note || ""}
+                  onChange={(e) => setForm((f) => ({ ...f, preorder_note: e.target.value }))}
+                  placeholder="Ships the week of November 16."
+                  maxLength={160}
+                  className={inputClass}
+                />
+              </div>
+            )}
           </div>
 
           {/* Images */}

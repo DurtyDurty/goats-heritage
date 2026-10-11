@@ -17,6 +17,10 @@ interface Product {
   inventory_count: number;
   is_active: boolean;
   is_member_exclusive: boolean;
+  is_preorder: boolean;
+  preorder_note: string | null;
+  /** Pre-ordered units paid for but not shipped yet. */
+  preorder_owed: number;
   metadata: Record<string, string>;
 }
 
@@ -36,6 +40,19 @@ export default function AdminProductsPage() {
   useEffect(() => {
     fetchProducts();
   }, []);
+
+  async function togglePreorder(p: Product) {
+    const next = !p.is_preorder;
+    // Flip it on screen right away, then confirm with the server
+    setProducts((list) => list.map((x) => (x.id === p.id ? { ...x, is_preorder: next } : x)));
+    const res = await fetch("/api/admin/products", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: p.id, is_preorder: next }),
+    });
+    if (!res.ok) alert("Could not change pre-order for this product. Please try again.");
+    fetchProducts();
+  }
 
   async function handleDelete(id: string) {
     if (!confirm("Deactivate this product?")) return;
@@ -73,6 +90,7 @@ export default function AdminProductsPage() {
               <th className="px-4 py-3 font-medium">Price</th>
               <th className="px-4 py-3 font-medium">Inventory</th>
               <th className="px-4 py-3 font-medium">Status</th>
+              <th className="px-4 py-3 font-medium">Pre-order</th>
               <th className="px-4 py-3 font-medium">Exclusive</th>
               <th className="px-4 py-3 font-medium">Actions</th>
             </tr>
@@ -80,13 +98,13 @@ export default function AdminProductsPage() {
           <tbody className="divide-y divide-[#262626]">
             {loading ? (
               <tr>
-                <td colSpan={8} className="py-12 text-center text-[#A3A3A3]">
+                <td colSpan={9} className="py-12 text-center text-[#A3A3A3]">
                   Loading...
                 </td>
               </tr>
             ) : products.length === 0 ? (
               <tr>
-                <td colSpan={8} className="py-12 text-center text-[#A3A3A3]">
+                <td colSpan={9} className="py-12 text-center text-[#A3A3A3]">
                   No products yet
                 </td>
               </tr>
@@ -136,6 +154,32 @@ export default function AdminProductsPage() {
                     >
                       {p.is_active ? "Active" : "Inactive"}
                     </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={p.is_preorder}
+                        aria-label={`Pre-order for ${p.name}`}
+                        onClick={() => togglePreorder(p)}
+                        className={`relative h-5 w-9 flex-shrink-0 rounded-full transition-colors ${
+                          p.is_preorder ? "bg-[#C8A84E]" : "bg-[#262626]"
+                        }`}
+                      >
+                        <span
+                          className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-all ${
+                            p.is_preorder ? "left-[18px]" : "left-0.5"
+                          }`}
+                        />
+                      </button>
+                      <span className={`text-xs ${p.is_preorder ? "text-[#C8A84E]" : "text-[#A3A3A3]"}`}>
+                        {p.is_preorder ? "On" : "Off"}
+                      </span>
+                    </div>
+                    {p.preorder_owed > 0 && (
+                      <p className="mt-1 text-xs text-[#F59E0B]">{p.preorder_owed} owed</p>
+                    )}
                   </td>
                   <td className="px-4 py-3">
                     {p.is_member_exclusive && (

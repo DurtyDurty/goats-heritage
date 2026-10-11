@@ -16,7 +16,40 @@ export async function GET() {
     .order("created_at", { ascending: false });
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ products: data });
+
+  // Pre-ordered units that are paid for but not shipped yet, per product
+  const { data: owedItems } = await supabase
+    .from("order_items")
+    .select("product_id, quantity, orders!inner(status)")
+    .eq("is_preorder", true)
+    .eq("orders.status", "paid");
+
+  const owed = new Map<string, number>();
+  for (const item of owedItems || []) {
+    if (!item.product_id) continue;
+    owed.set(item.product_id, (owed.get(item.product_id) || 0) + (item.quantity || 0));
+  }
+
+  return NextResponse.json({
+    products: (data || []).map((p: any) => ({ ...p, preorder_owed: owed.get(p.id) || 0 })),
+  });
+}
+
+// Quick pre-order switch from the products list
+export async function PATCH(request: Request) {
+  const admin = await verifyAdmin();
+  if (!admin) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
+  const { id, is_preorder } = await request.json();
+  if (!id || typeof is_preorder !== "boolean") {
+    return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+  }
+
+  const supabase = createAdminClient();
+  const { error } = await supabase.from("products").update({ is_preorder }).eq("id", id);
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json({ success: true });
 }
 
 export async function POST(request: Request) {
@@ -39,6 +72,8 @@ export async function POST(request: Request) {
       inventory_count: body.inventory_count || 0,
       is_active: body.is_active ?? true,
       is_member_exclusive: body.is_member_exclusive ?? false,
+      is_preorder: body.is_preorder ?? false,
+      preorder_note: (body.preorder_note || "").trim() || null,
       metadata: body.metadata || {},
     })
     .select()
