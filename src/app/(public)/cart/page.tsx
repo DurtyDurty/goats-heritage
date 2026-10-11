@@ -92,7 +92,6 @@ export default function CartPage() {
                         className="font-medium text-[#F5F5F5] transition-colors hover:text-[#C8A84E]"
                       >
                         {item.name}
-                        {item.is_preorder && <span className="ml-2 text-[10px] font-bold uppercase tracking-wider text-[#C8A84E]">Pre-order</span>}
                       </Link>
                       <p className="mt-0.5 text-xs uppercase tracking-wider text-[#A3A3A3]">
                         {item.category}

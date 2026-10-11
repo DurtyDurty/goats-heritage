@@ -15,8 +15,8 @@ interface Product {
   inventory_count: number;
   is_active: boolean;
   is_member_exclusive: boolean;
-  is_preorder?: boolean;
-  preorder_note?: string | null;
+  is_upcoming?: boolean;
+  upcoming_note?: string | null;
   metadata: Record<string, string>;
 }
 
@@ -31,8 +31,8 @@ const emptyProduct: Product = {
   inventory_count: 0,
   is_active: true,
   is_member_exclusive: false,
-  is_preorder: false,
-  preorder_note: "",
+  is_upcoming: false,
+  upcoming_note: "",
   metadata: {},
 };
 
@@ -260,7 +260,8 @@ export default function ProductForm({ product, open, onClose, onSaved }: Props) 
             <label className="flex items-center gap-2 text-sm text-[#A3A3A3]">
               <input
                 type="checkbox"
-                checked={form.is_active}
+                checked={form.is_active && !form.is_upcoming}
+                disabled={!!form.is_upcoming}
                 onChange={(e) => setForm((f) => ({ ...f, is_active: e.target.checked }))}
                 className="accent-[#C8A84E]"
               />
@@ -279,28 +280,30 @@ export default function ProductForm({ product, open, onClose, onSaved }: Props) 
             </label>
           </div>
 
-          {/* Pre-order */}
+          {/* Upcoming product: planned, kept out of the store */}
           <div className="rounded-lg border border-[#262626] p-3">
             <label className="flex items-center gap-2 text-sm text-[#F5F5F5]">
               <input
                 type="checkbox"
-                checked={!!form.is_preorder}
-                onChange={(e) => setForm((f) => ({ ...f, is_preorder: e.target.checked }))}
+                checked={!!form.is_upcoming}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, is_upcoming: e.target.checked, is_active: !e.target.checked }))
+                }
                 className="accent-[#C8A84E]"
               />
-              Pre-order
+              Upcoming product
             </label>
             <p className="mt-1 text-xs text-[#A3A3A3]">
-              Customers can buy this even with 0 in stock. They are charged at checkout and it ships when stock arrives.
+              Hidden from customers. Use it to set up a product before it is ready to sell, then switch it off to put it live.
             </p>
-            {form.is_preorder && (
+            {form.is_upcoming && (
               <div className="mt-3">
-                <label className="mb-1 block text-xs text-[#A3A3A3]">Message to customers (optional)</label>
+                <label className="mb-1 block text-xs text-[#A3A3A3]">Planning note (only admins see this)</label>
                 <input
-                  value={form.preorder_note || ""}
-                  onChange={(e) => setForm((f) => ({ ...f, preorder_note: e.target.value }))}
-                  placeholder="Ships the week of November 16."
-                  maxLength={160}
+                  value={form.upcoming_note || ""}
+                  onChange={(e) => setForm((f) => ({ ...f, upcoming_note: e.target.value }))}
+                  placeholder="Arriving mid November, 500 units"
+                  maxLength={200}
                   className={inputClass}
                 />
               </div>

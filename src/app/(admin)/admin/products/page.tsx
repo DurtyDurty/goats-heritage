@@ -17,10 +17,9 @@ interface Product {
   inventory_count: number;
   is_active: boolean;
   is_member_exclusive: boolean;
-  is_preorder: boolean;
-  preorder_note: string | null;
-  /** Pre-ordered units paid for but not shipped yet. */
-  preorder_owed: number;
+  /** Planned product, kept out of the store until it goes live. */
+  is_upcoming: boolean;
+  upcoming_note: string | null;
   metadata: Record<string, string>;
 }
 
@@ -41,16 +40,19 @@ export default function AdminProductsPage() {
     fetchProducts();
   }, []);
 
-  async function togglePreorder(p: Product) {
-    const next = !p.is_preorder;
-    // Flip it on screen right away, then confirm with the server
-    setProducts((list) => list.map((x) => (x.id === p.id ? { ...x, is_preorder: next } : x)));
+  async function toggleUpcoming(p: Product) {
+    const next = !p.is_upcoming;
+    const question = next
+      ? `Mark "${p.name}" as upcoming? It will be hidden from the store.`
+      : `Put "${p.name}" live on the store now?`;
+    if (!confirm(question)) return;
+
     const res = await fetch("/api/admin/products", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: p.id, is_preorder: next }),
+      body: JSON.stringify({ id: p.id, is_upcoming: next }),
     });
-    if (!res.ok) alert("Could not change pre-order for this product. Please try again.");
+    if (!res.ok) alert("Could not change this product. Please try again.");
     fetchProducts();
   }
 
@@ -90,7 +92,7 @@ export default function AdminProductsPage() {
               <th className="px-4 py-3 font-medium">Price</th>
               <th className="px-4 py-3 font-medium">Inventory</th>
               <th className="px-4 py-3 font-medium">Status</th>
-              <th className="px-4 py-3 font-medium">Pre-order</th>
+              <th className="px-4 py-3 font-medium">Upcoming</th>
               <th className="px-4 py-3 font-medium">Exclusive</th>
               <th className="px-4 py-3 font-medium">Actions</th>
             </tr>
@@ -147,12 +149,14 @@ export default function AdminProductsPage() {
                   <td className="px-4 py-3">
                     <span
                       className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                        p.is_active
+                        p.is_upcoming
+                          ? "bg-[#C8A84E]/10 text-[#C8A84E]"
+                          : p.is_active
                           ? "bg-[#22C55E]/10 text-[#22C55E]"
                           : "bg-[#EF4444]/10 text-[#EF4444]"
                       }`}
                     >
-                      {p.is_active ? "Active" : "Inactive"}
+                      {p.is_upcoming ? "Upcoming" : p.is_active ? "Active" : "Inactive"}
                     </span>
                   </td>
                   <td className="px-4 py-3">
@@ -160,25 +164,25 @@ export default function AdminProductsPage() {
                       <button
                         type="button"
                         role="switch"
-                        aria-checked={p.is_preorder}
-                        aria-label={`Pre-order for ${p.name}`}
-                        onClick={() => togglePreorder(p)}
+                        aria-checked={p.is_upcoming}
+                        aria-label={`Upcoming product: ${p.name}`}
+                        onClick={() => toggleUpcoming(p)}
                         className={`relative h-5 w-9 flex-shrink-0 rounded-full transition-colors ${
-                          p.is_preorder ? "bg-[#C8A84E]" : "bg-[#262626]"
+                          p.is_upcoming ? "bg-[#C8A84E]" : "bg-[#262626]"
                         }`}
                       >
                         <span
                           className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-all ${
-                            p.is_preorder ? "left-[18px]" : "left-0.5"
+                            p.is_upcoming ? "left-[18px]" : "left-0.5"
                           }`}
                         />
                       </button>
-                      <span className={`text-xs ${p.is_preorder ? "text-[#C8A84E]" : "text-[#A3A3A3]"}`}>
-                        {p.is_preorder ? "On" : "Off"}
+                      <span className={`text-xs ${p.is_upcoming ? "text-[#C8A84E]" : "text-[#A3A3A3]"}`}>
+                        {p.is_upcoming ? "On" : "Off"}
                       </span>
                     </div>
-                    {p.preorder_owed > 0 && (
-                      <p className="mt-1 text-xs text-[#F59E0B]">{p.preorder_owed} owed</p>
+                    {p.is_upcoming && p.upcoming_note && (
+                      <p className="mt-1 max-w-[180px] text-xs text-[#A3A3A3]">{p.upcoming_note}</p>
                     )}
                   </td>
                   <td className="px-4 py-3">

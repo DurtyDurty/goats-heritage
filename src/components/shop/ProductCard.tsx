@@ -11,8 +11,7 @@ export default function ProductCard({ product }: { product: Product }) {
   const { showToast } = useToast();
   const href = `/shop/${product.category}/${product.slug}`;
   const hasImage = product.images.length > 0;
-  const preorder = product.is_preorder;
-  const soldOut = product.inventory_count === 0 && !preorder;
+  const soldOut = product.inventory_count === 0;
 
   function handleAdd() {
     addToCart({
@@ -23,7 +22,6 @@ export default function ProductCard({ product }: { product: Product }) {
       price_cents: product.price_cents,
       image: hasImage ? product.images[0] : null,
       is_member_exclusive: product.is_member_exclusive,
-      is_preorder: preorder,
     });
     showToast(`${product.name} added to cart`);
   }
@@ -55,12 +53,6 @@ export default function ProductCard({ product }: { product: Product }) {
         {product.is_member_exclusive && (
           <span className="absolute left-3 top-3 z-10 rounded-md bg-[#C8A84E] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-black">
             Members Only
-          </span>
-        )}
-
-        {preorder && (
-          <span className="absolute right-3 top-3 z-10 rounded-md bg-black/80 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-[#C8A84E] ring-1 ring-[#C8A84E]">
-            Pre-Order
           </span>
         )}
       </Link>
@@ -104,7 +96,7 @@ export default function ProductCard({ product }: { product: Product }) {
           onClick={handleAdd}
           className="w-full bg-[#C8A84E] py-2.5 text-sm font-semibold text-black transition-colors hover:bg-[#E8D48B]"
         >
-          {preorder ? "Pre-Order" : "Add to Cart"}
+          Add to Cart
         </button>
       )}
     </div>

@@ -18,7 +18,6 @@ export interface CartItem {
   image: string | null;
   quantity: number;
   is_member_exclusive: boolean;
-  is_preorder?: boolean;
 }
 
 interface CartContextValue {

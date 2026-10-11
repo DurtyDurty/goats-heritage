@@ -16,7 +16,7 @@ export async function GET(request: Request) {
   const supabase = createAdminClient();
   let query = supabase
     .from("orders")
-    .select("*, profiles(full_name, email), order_items(id, quantity, unit_price_cents, is_preorder, products(name))")
+    .select("*, profiles(full_name, email), order_items(id, quantity, unit_price_cents, products(name))")
     .order("created_at", { ascending: false });
 
   if (status && status !== "all") {

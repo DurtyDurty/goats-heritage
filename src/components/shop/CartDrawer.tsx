@@ -107,7 +107,6 @@ export default function CartDrawer() {
                           className="text-sm font-medium text-[#F5F5F5] transition-colors hover:text-[#C8A84E]"
                         >
                           {item.name}
-                          {item.is_preorder && <span className="ml-2 text-[10px] font-bold uppercase tracking-wider text-[#C8A84E]">Pre-order</span>}
                         </Link>
                         <button
                           onClick={() => removeFromCart(item.product_id)}

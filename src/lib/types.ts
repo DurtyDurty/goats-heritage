@@ -10,10 +10,6 @@ export interface Product {
   inventory_count: number;
   is_active: boolean;
   is_member_exclusive: boolean;
-  /** Pre-order: can be bought with no stock. Set in Admin > Products. */
-  is_preorder: boolean;
-  /** Optional "ships by" text shown to customers on a pre-order product. */
-  preorder_note: string | null;
   metadata: Record<string, string>;
   created_at: string;
   updated_at: string;
