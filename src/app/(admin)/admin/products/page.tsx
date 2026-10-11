@@ -17,11 +17,27 @@ interface Product {
   inventory_count: number;
   is_active: boolean;
   is_member_exclusive: boolean;
-  /** Planned product, kept out of the store until it goes live. */
-  is_upcoming: boolean;
-  upcoming_note: string | null;
+  is_preorder: boolean;
+  preorder_note: string | null;
+  /** Pre-saleed units paid for but not shipped yet. */
+  preorder_owed: number;
   metadata: Record<string, string>;
 }
+
+// Live: on the store, sold from stock. Pre-sale: on the store, can be bought before
+// stock arrives. Hidden: not on the store.
+type ProductStatus = "live" | "presale" | "hidden";
+
+function statusOf(p: { is_active: boolean; is_preorder: boolean }): ProductStatus {
+  if (!p.is_active) return "hidden";
+  return p.is_preorder ? "presale" : "live";
+}
+
+const statusStyles: Record<ProductStatus, string> = {
+  live: "border-[#22C55E]/40 text-[#22C55E]",
+  presale: "border-[#C8A84E]/60 text-[#C8A84E]",
+  hidden: "border-[#EF4444]/40 text-[#EF4444]",
+};
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -40,19 +56,19 @@ export default function AdminProductsPage() {
     fetchProducts();
   }, []);
 
-  async function toggleUpcoming(p: Product) {
-    const next = !p.is_upcoming;
-    const question = next
-      ? `Mark "${p.name}" as upcoming? It will be hidden from the store.`
-      : `Put "${p.name}" live on the store now?`;
-    if (!confirm(question)) return;
-
+  async function changeStatus(p: Product, status: ProductStatus) {
+    // Show the new status right away, then confirm with the server
+    setProducts((list) =>
+      list.map((x) =>
+        x.id === p.id ? { ...x, is_active: status !== "hidden", is_preorder: status === "presale" } : x
+      )
+    );
     const res = await fetch("/api/admin/products", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: p.id, is_upcoming: next }),
+      body: JSON.stringify({ id: p.id, status }),
     });
-    if (!res.ok) alert("Could not change this product. Please try again.");
+    if (!res.ok) alert("Could not change the status of this product. Please try again.");
     fetchProducts();
   }
 
@@ -92,7 +108,6 @@ export default function AdminProductsPage() {
               <th className="px-4 py-3 font-medium">Price</th>
               <th className="px-4 py-3 font-medium">Inventory</th>
               <th className="px-4 py-3 font-medium">Status</th>
-              <th className="px-4 py-3 font-medium">Upcoming</th>
               <th className="px-4 py-3 font-medium">Exclusive</th>
               <th className="px-4 py-3 font-medium">Actions</th>
             </tr>
@@ -100,13 +115,13 @@ export default function AdminProductsPage() {
           <tbody className="divide-y divide-[#262626]">
             {loading ? (
               <tr>
-                <td colSpan={9} className="py-12 text-center text-[#A3A3A3]">
+                <td colSpan={8} className="py-12 text-center text-[#A3A3A3]">
                   Loading...
                 </td>
               </tr>
             ) : products.length === 0 ? (
               <tr>
-                <td colSpan={9} className="py-12 text-center text-[#A3A3A3]">
+                <td colSpan={8} className="py-12 text-center text-[#A3A3A3]">
                   No products yet
                 </td>
               </tr>
@@ -147,42 +162,18 @@ export default function AdminProductsPage() {
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    <span
-                      className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                        p.is_upcoming
-                          ? "bg-[#C8A84E]/10 text-[#C8A84E]"
-                          : p.is_active
-                          ? "bg-[#22C55E]/10 text-[#22C55E]"
-                          : "bg-[#EF4444]/10 text-[#EF4444]"
-                      }`}
+                    <select
+                      value={statusOf(p)}
+                      onChange={(e) => changeStatus(p, e.target.value as ProductStatus)}
+                      aria-label={`Status of ${p.name}`}
+                      className={`rounded-lg border bg-[#0A0A0A] px-2 py-1 text-xs font-medium outline-none focus:border-[#C8A84E] ${statusStyles[statusOf(p)]}`}
                     >
-                      {p.is_upcoming ? "Upcoming" : p.is_active ? "Active" : "Inactive"}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        role="switch"
-                        aria-checked={p.is_upcoming}
-                        aria-label={`Upcoming product: ${p.name}`}
-                        onClick={() => toggleUpcoming(p)}
-                        className={`relative h-5 w-9 flex-shrink-0 rounded-full transition-colors ${
-                          p.is_upcoming ? "bg-[#C8A84E]" : "bg-[#262626]"
-                        }`}
-                      >
-                        <span
-                          className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-all ${
-                            p.is_upcoming ? "left-[18px]" : "left-0.5"
-                          }`}
-                        />
-                      </button>
-                      <span className={`text-xs ${p.is_upcoming ? "text-[#C8A84E]" : "text-[#A3A3A3]"}`}>
-                        {p.is_upcoming ? "On" : "Off"}
-                      </span>
-                    </div>
-                    {p.is_upcoming && p.upcoming_note && (
-                      <p className="mt-1 max-w-[180px] text-xs text-[#A3A3A3]">{p.upcoming_note}</p>
+                      <option value="live" className="text-white">Live</option>
+                      <option value="presale" className="text-white">Pre-sale</option>
+                      <option value="hidden" className="text-white">Hidden</option>
+                    </select>
+                    {p.preorder_owed > 0 && (
+                      <p className="mt-1 text-xs text-[#F59E0B]">{p.preorder_owed} pre-sold, not shipped</p>
                     )}
                   </td>
                   <td className="px-4 py-3">

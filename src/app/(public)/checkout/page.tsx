@@ -451,11 +451,19 @@ export default function CheckoutPage() {
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium text-[#F5F5F5]">{item.name}</p>
                       <p className="text-xs capitalize text-[#A3A3A3]">{item.category} · {formatPrice(item.price_cents)} each</p>
+                      {item.is_preorder && <p className="text-[10px] font-bold uppercase tracking-wider text-[#C8A84E]">Pre-sale</p>}
                     </div>
                     <span className="text-sm font-medium text-[#F5F5F5]">{formatPrice(item.price_cents * item.quantity)}</span>
                   </div>
                 ))}
               </div>
+
+              {items.some((i) => i.is_preorder) && (
+                <p role="status" className="rounded-lg border border-[#C8A84E]/30 bg-[#C8A84E]/5 px-4 py-3 text-xs text-[#A3A3A3]">
+                  <span className="font-semibold text-[#E8D48B]">This order includes pre-sale items.</span> You are
+                  charged today, and the whole order ships together once the pre-sale items arrive.
+                </p>
+              )}
 
               <div className="space-y-2 border-t border-[#262626] pt-4 text-sm">
                 <div className="flex justify-between text-[#A3A3A3]">

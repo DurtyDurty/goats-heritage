@@ -63,7 +63,8 @@ export default async function ProductDetailPage({ params }: Props) {
 
   const p = product as Product;
   const label = CATEGORY_LABELS[p.category] || p.category;
-  const soldOut = p.inventory_count === 0;
+  const preorder = p.is_preorder;
+  const soldOut = p.inventory_count === 0 && !preorder;
 
   // Related products
   const { data: related } = await supabase
@@ -157,6 +158,17 @@ export default async function ProductDetailPage({ params }: Props) {
               </div>
             )}
 
+            {/* Pre-sale notice */}
+            {preorder && (
+              <div className="mt-6 rounded-lg border border-[#C8A84E]/40 bg-[#C8A84E]/5 px-4 py-3">
+                <p className="text-sm font-semibold text-[#E8D48B]">Pre-sale</p>
+                <p className="mt-1 text-sm text-[#A3A3A3]">
+                  {p.preorder_note || "This item is not in stock yet and ships as soon as it arrives."} You are
+                  charged when you place the order.
+                </p>
+              </div>
+            )}
+
             {/* Quantity + Add to Cart */}
             <div className="mt-8">
               <AddToCartButton
@@ -168,9 +180,11 @@ export default async function ProductDetailPage({ params }: Props) {
                   price_cents: p.price_cents,
                   image: p.images.length > 0 ? p.images[0] : null,
                   is_member_exclusive: p.is_member_exclusive,
+                  is_preorder: preorder,
                 }}
-                maxQty={p.inventory_count}
+                maxQty={preorder ? 99 : p.inventory_count}
                 soldOut={soldOut}
+                preorder={preorder}
               />
             </div>
           </div>

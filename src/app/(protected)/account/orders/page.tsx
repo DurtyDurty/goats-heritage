@@ -25,7 +25,7 @@ export default async function OrdersPage({ searchParams }: Props) {
 
   const { data: orders } = await supabase
     .from("orders")
-    .select("*, order_items(id, product_id, quantity, unit_price_cents, products(name, slug, category, images))")
+    .select("*, order_items(id, product_id, quantity, unit_price_cents, is_preorder, products(name, slug, category, images))")
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });
 
@@ -130,7 +130,10 @@ export default async function OrdersPage({ searchParams }: Props) {
                         >
                           {item.products?.name || "Product"}
                         </Link>
-                        <p className="mt-0.5 text-xs text-[#A3A3A3]">Qty: {item.quantity}</p>
+                        <p className="mt-0.5 text-xs text-[#A3A3A3]">
+                          Qty: {item.quantity}
+                          {item.is_preorder && <span className="ml-2 font-semibold text-[#C8A84E]">Pre-sale, ships when available</span>}
+                        </p>
                       </div>
                       <p className="text-sm font-medium text-[#F5F5F5]">
                         {formatPrice(item.unit_price_cents * item.quantity)}

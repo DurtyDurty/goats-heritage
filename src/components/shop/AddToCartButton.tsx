@@ -9,9 +9,11 @@ interface Props {
   item: Omit<CartItem, "quantity">;
   maxQty: number;
   soldOut: boolean;
+  /** Pre-sale products are not limited by stock. */
+  preorder?: boolean;
 }
 
-export default function AddToCartButton({ item, maxQty, soldOut }: Props) {
+export default function AddToCartButton({ item, maxQty, soldOut, preorder = false }: Props) {
   const { addToCart } = useCart();
   const { showToast } = useToast();
   const [qty, setQty] = useState(1);
@@ -68,10 +70,10 @@ export default function AddToCartButton({ item, maxQty, soldOut }: Props) {
         onClick={handleAdd}
         className="w-full rounded-lg bg-[#C8A84E] py-3.5 text-sm font-bold text-black transition-colors hover:bg-[#E8D48B]"
       >
-        Add to Cart
+        {preorder ? "Pre-Sale" : "Add to Cart"}
       </button>
 
-      {maxQty <= 10 && (
+      {!preorder && maxQty <= 10 && (
         <p className="text-center text-xs text-[#F59E0B]">
           Only {maxQty} left in stock
         </p>

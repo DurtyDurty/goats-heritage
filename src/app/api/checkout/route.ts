@@ -94,7 +94,7 @@ export async function POST(request: Request) {
     // Validate products and take prices from the database, never from the browser
     const { data: products, error: productsError } = await adminSupabase
       .from("products")
-      .select("id, name, category, price_cents, weight_oz, inventory_count, is_active")
+      .select("id, name, category, price_cents, weight_oz, inventory_count, is_active, is_preorder")
       .in("id", items.map((i) => i.product_id));
 
     if (productsError || !products) {
@@ -102,7 +102,7 @@ export async function POST(request: Request) {
     }
 
     const productMap = new Map(products.map((p) => [p.id, p]));
-    const lines: { product_id: string; quantity: number; unit_price_cents: number }[] = [];
+    const lines: { product_id: string; quantity: number; unit_price_cents: number; is_preorder: boolean }[] = [];
     const pricedLines: PricedLine[] = [];
     const shippingLines: ShippingLine[] = [];
 
@@ -111,10 +111,16 @@ export async function POST(request: Request) {
       if (!product || !product.is_active) {
         return NextResponse.json({ error: "An item in your cart is no longer available." }, { status: 400 });
       }
-      if (product.inventory_count < item.quantity) {
+      // Pre-sale products can be bought with no stock on hand
+      if (!product.is_preorder && product.inventory_count < item.quantity) {
         return NextResponse.json({ error: `"${product.name}" has insufficient stock` }, { status: 400 });
       }
-      lines.push({ product_id: product.id, quantity: item.quantity, unit_price_cents: product.price_cents });
+      lines.push({
+        product_id: product.id,
+        quantity: item.quantity,
+        unit_price_cents: product.price_cents,
+        is_preorder: Boolean(product.is_preorder),
+      });
       pricedLines.push({ category: product.category, unit_price_cents: product.price_cents, quantity: item.quantity });
       shippingLines.push({ weight_oz: product.weight_oz, quantity: item.quantity });
     }
