@@ -1,8 +1,36 @@
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+import { createHmac, timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+
+// Resend signs each webhook (Svix format) with the webhook's whsec_ signing secret.
+// Requests older or newer than this are refused, so a captured request can't be replayed later.
+const TOLERANCE_SECONDS = 5 * 60;
+
+function verifySignature(rawBody: string, headers: Headers, secret: string): boolean {
+  const id = headers.get("svix-id");
+  const timestamp = headers.get("svix-timestamp");
+  const signature = headers.get("svix-signature");
+  if (!id || !timestamp || !signature) return false;
+
+  const ts = Number(timestamp);
+  if (!Number.isInteger(ts) || Math.abs(Math.floor(Date.now() / 1000) - ts) > TOLERANCE_SECONDS) return false;
+
+  const key = Buffer.from(secret.replace(/^whsec_/, ""), "base64");
+  // A truncated or mistyped secret must not turn into a guessable key
+  if (key.length < 16) return false;
+
+  const expected = createHmac("sha256", key).update(`${id}.${timestamp}.${rawBody}`).digest();
+  // The header can carry several space-separated signatures ("v1,<base64>") during key rotation
+  return signature.split(" ").some((part) => {
+    const [version, sig] = part.split(",");
+    if (version !== "v1" || !sig) return false;
+    const given = Buffer.from(sig, "base64");
+    return given.length === expected.length && timingSafeEqual(given, expected);
+  });
+}
 
 function stripHtml(html: string): string {
   return html
@@ -45,7 +73,20 @@ function isForGoatsHeritage(to: unknown): boolean {
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
+    const rawBody = await request.text();
+
+    // Only Resend may post here. Without the secret configured nothing could be verified,
+    // so the endpoint refuses everything rather than accept forged messages.
+    const secret = (process.env.RESEND_WEBHOOK_SECRET || "").trim();
+    if (!secret) {
+      console.error("Inbound email rejected: RESEND_WEBHOOK_SECRET is not set");
+      return NextResponse.json({ error: "Not configured" }, { status: 503 });
+    }
+    if (!verifySignature(rawBody, request.headers, secret)) {
+      return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
+    }
+
+    const body = JSON.parse(rawBody);
 
     const emailData = body.data || body;
 
