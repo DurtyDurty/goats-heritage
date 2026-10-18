@@ -24,11 +24,34 @@ function stripHtml(html: string): string {
     .trim();
 }
 
+// Resend sends every email received on the account to this webhook, including mail
+// for other businesses' domains on the same Resend account (e.g. Corsa Auto Detailing).
+// Only mail addressed to goatsheritage.com (or a subdomain of it) belongs in this inbox.
+const OWN_DOMAIN = "goatsheritage.com";
+
+function recipientDomains(to: unknown): string[] {
+  const list = Array.isArray(to) ? to : to ? [to] : [];
+  return list
+    .map((r) => /@([^\s>]+)/.exec(String(r))?.[1]?.toLowerCase() || "")
+    .filter(Boolean);
+}
+
+function isForGoatsHeritage(to: unknown): boolean {
+  const domains = recipientDomains(to);
+  // No recipient information: keep the old behaviour rather than drop real mail
+  if (domains.length === 0) return true;
+  return domains.some((d) => d === OWN_DOMAIN || d.endsWith(`.${OWN_DOMAIN}`));
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
 
     const emailData = body.data || body;
+
+    if (!isForGoatsHeritage(emailData.to)) {
+      return NextResponse.json({ received: true, filtered: true });
+    }
 
     const from = emailData.from || "unknown@email.com";
     const fromName = from.split("@")[0];
