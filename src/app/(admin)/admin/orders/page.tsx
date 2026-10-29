@@ -33,6 +33,16 @@ export default function AdminOrdersPage() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
   const [openId, setOpenId] = useState<string | null>(null);
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+
+  // Downloads the orders spreadsheet for the selected status and date range
+  function exportOrders() {
+    const params = new URLSearchParams({ status: filter });
+    if (from) params.set("from", from);
+    if (to) params.set("to", to);
+    window.location.href = `/api/admin/orders/export?${params}`;
+  }
 
   async function fetchOrders() {
     const res = await fetch(`/api/admin/orders?status=${filter}`);
@@ -57,7 +67,38 @@ export default function AdminOrdersPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-[#F5F5F5]">Orders</h1>
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <h1 className="text-2xl font-bold text-[#F5F5F5]">Orders</h1>
+
+        {/* Excel export for accounting and sales tax filing */}
+        <div className="flex flex-wrap items-end gap-2 text-xs text-[#A3A3A3]">
+          <label className="flex flex-col gap-1">
+            From
+            <input
+              type="date"
+              value={from}
+              onChange={(e) => setFrom(e.target.value)}
+              className="rounded-lg border border-[#262626] bg-[#1A1A1A] px-2 py-1.5 text-sm text-[#F5F5F5] outline-none [color-scheme:dark] focus:border-[#C8A84E]"
+            />
+          </label>
+          <label className="flex flex-col gap-1">
+            To
+            <input
+              type="date"
+              value={to}
+              onChange={(e) => setTo(e.target.value)}
+              className="rounded-lg border border-[#262626] bg-[#1A1A1A] px-2 py-1.5 text-sm text-[#F5F5F5] outline-none [color-scheme:dark] focus:border-[#C8A84E]"
+            />
+          </label>
+          <button
+            type="button"
+            onClick={exportOrders}
+            className="rounded-lg bg-[#C8A84E] px-4 py-2 text-sm font-medium text-black transition-colors hover:bg-[#E8D48B]"
+          >
+            Export to Excel
+          </button>
+        </div>
+      </div>
 
       {/* Filter tabs */}
       <div className="mt-4 flex gap-2">
