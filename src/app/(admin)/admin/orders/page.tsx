@@ -1,6 +1,7 @@
 "use client";
 
 import { Fragment, useState, useEffect } from "react";
+import { GATEWAY_PROVIDER, MANUAL_PAYMENT_METHODS } from "@/lib/payment-methods";
 
 const statusFilters = ["all", "pending", "paid", "shipped", "delivered"];
 const statusOptions = ["pending", "paid", "shipped", "delivered", "cancelled"];
@@ -21,6 +22,7 @@ interface Order {
   tracking_number: string | null;
   created_at: string;
   payment_reference?: string | null;
+  payment_provider?: string | null;
   shipping_address: Record<string, any> | null;
   profiles: { full_name: string | null; email: string | null };
   order_items: { id: string; quantity: number; unit_price_cents: number; is_preorder: boolean; products: { name: string } | null }[];
@@ -250,11 +252,44 @@ export default function AdminOrdersPage() {
                             {ship.phone && <p className="text-[#A3A3A3]">{ship.phone}</p>}
                           </div>
                           <div>
+                            <p className="text-xs font-medium uppercase tracking-wider text-[#A3A3A3]">Payment</p>
+                            {o.payment_provider === GATEWAY_PROVIDER ? (
+                              <p className="mt-2 text-[#A3A3A3]">
+                                Card (Bankful)
+                                {o.payment_reference && <span className="ml-2 font-mono text-xs">{o.payment_reference}</span>}
+                              </p>
+                            ) : (
+                              // Paid outside the website: record how
+                              <div className="mt-2 flex flex-wrap gap-2">
+                                <select
+                                  value={o.payment_provider || ""}
+                                  onChange={(e) => updateOrder(o.id, { payment_provider: e.target.value || null })}
+                                  className="rounded border border-[#262626] bg-[#141414] px-2 py-1 text-xs text-[#F5F5F5] outline-none focus:border-[#C8A84E]"
+                                >
+                                  <option value="">Not recorded</option>
+                                  {MANUAL_PAYMENT_METHODS.map((m) => (
+                                    <option key={m.value} value={m.value}>
+                                      {m.label}
+                                    </option>
+                                  ))}
+                                </select>
+                                <input
+                                  key={`${o.id}-${o.payment_reference || ""}`}
+                                  defaultValue={o.payment_reference || ""}
+                                  placeholder="Transaction ID or note"
+                                  onBlur={(e) => {
+                                    if (e.target.value.trim() !== (o.payment_reference || "")) {
+                                      updateOrder(o.id, { payment_reference: e.target.value });
+                                    }
+                                  }}
+                                  className="w-48 rounded border border-[#262626] bg-transparent px-2 py-1 text-xs text-[#A3A3A3] outline-none focus:border-[#C8A84E]"
+                                />
+                              </div>
+                            )}
+                          </div>
+                          <div>
                             <p className="text-xs font-medium uppercase tracking-wider text-[#A3A3A3]">Reference</p>
                             <p className="mt-2 break-all font-mono text-xs text-[#A3A3A3]">Order {o.id}</p>
-                            {o.payment_reference && (
-                              <p className="font-mono text-xs text-[#A3A3A3]">Bankful {o.payment_reference}</p>
-                            )}
                           </div>
                         </div>
                       </div>

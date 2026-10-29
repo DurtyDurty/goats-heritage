@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 import { verifyAdmin } from "@/lib/admin-auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendShippingUpdate } from "@/lib/email/send";
+import { GATEWAY_PROVIDER, isManualPaymentMethod } from "@/lib/payment-methods";
 
 export async function GET(request: Request) {
   const admin = await verifyAdmin();
@@ -32,12 +33,26 @@ export async function PATCH(request: Request) {
   const admin = await verifyAdmin();
   if (!admin) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-  const { id, status, tracking_number } = await request.json();
+  const { id, status, tracking_number, payment_provider, payment_reference } = await request.json();
   const supabase = createAdminClient();
 
   const updates: Record<string, any> = {};
   if (status) updates.status = status;
   if (tracking_number !== undefined) updates.tracking_number = tracking_number;
+
+  // Payment method for orders paid outside the website. Orders the gateway
+  // confirmed keep their Bankful record.
+  if (payment_provider !== undefined || payment_reference !== undefined) {
+    if (payment_provider !== undefined && payment_provider !== null && !isManualPaymentMethod(payment_provider)) {
+      return NextResponse.json({ error: "Unknown payment method" }, { status: 400 });
+    }
+    const { data: current } = await supabase.from("orders").select("payment_provider").eq("id", id).single();
+    if (current?.payment_provider === GATEWAY_PROVIDER) {
+      return NextResponse.json({ error: "This order was paid through Bankful and cannot be changed" }, { status: 400 });
+    }
+    if (payment_provider !== undefined) updates.payment_provider = payment_provider;
+    if (payment_reference !== undefined) updates.payment_reference = String(payment_reference || "").trim() || null;
+  }
 
   const { data, error } = await supabase
     .from("orders")

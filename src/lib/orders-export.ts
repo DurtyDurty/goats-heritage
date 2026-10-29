@@ -4,6 +4,7 @@
 
 import ExcelJS from "exceljs";
 import { calculateTotals, SALES_TAX_RATES } from "@/lib/pricing";
+import { paymentMethodLabel } from "@/lib/payment-methods";
 
 /** The columns the export reads from each order. */
 export const ORDERS_EXPORT_SELECT =
@@ -68,7 +69,7 @@ export async function buildOrdersWorkbook(
 
       const notes: string[] = [];
       if (!matches) notes.push("Breakdown does not match current tax rules; tax = total - subtotal - shipping");
-      if (COLLECTED.includes(o.status) && !o.payment_reference) notes.push("No Bankful transaction ID");
+      if (COLLECTED.includes(o.status) && !o.payment_provider) notes.push("No payment method recorded");
 
       return {
         day: when.day,
@@ -90,6 +91,7 @@ export async function buildOrdersWorkbook(
         salesTax,
         taxRate: SALES_TAX_RATES[state] || 0,
         total: o.total_cents,
+        paymentMethod: paymentMethodLabel(o.payment_provider),
         paymentReference: o.payment_reference || "",
         tracking: o.tracking_number || "",
         notes: notes.join(". "),
@@ -122,7 +124,8 @@ export async function buildOrdersWorkbook(
     { header: "Sales Tax", key: "salesTax", width: 11, style: { numFmt: MONEY } },
     { header: "Tax Rate", key: "taxRate", width: 9, style: { numFmt: "0.00%" } },
     { header: "Total Charged", key: "total", width: 14, style: { numFmt: MONEY } },
-    { header: "Bankful Transaction", key: "paymentReference", width: 19 },
+    { header: "Payment Method", key: "paymentMethod", width: 16 },
+    { header: "Payment Reference", key: "paymentReference", width: 19 },
     { header: "Tracking", key: "tracking", width: 22 },
     { header: "Order ID", key: "orderId", width: 38 },
     { header: "Notes", key: "notes", width: 50 },
@@ -167,7 +170,7 @@ export async function buildOrdersWorkbook(
     });
     totalRow.font = { bold: true };
   }
-  sheet.autoFilter = { from: "A1", to: "T1" };
+  sheet.autoFilter = { from: "A1", to: "U1" };
 
   // ── Sales tax by state ──────────────────────────────────────────────────────
   const tax = wb.addWorksheet("Sales Tax");
