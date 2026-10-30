@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X } from "lucide-react";
+import { ImagePlus, X } from "lucide-react";
 
 interface Product {
   id?: string;
@@ -38,6 +38,39 @@ const emptyProduct: Product = {
 
 const cigarTemplate = { origin: "", strength: "", ring_gauge: "", wrapper: "" };
 
+/** Longest side of an uploaded photo, in pixels. Big enough for zoom, small enough to load fast. */
+const MAX_IMAGE_EDGE = 2000;
+
+/**
+ * Resizes a photo in the browser and re-encodes it (WebP, or JPEG where the browser
+ * can't make WebP) so phone photos fit under the server's upload limit.
+ * GIFs are sent as they are to keep any animation.
+ */
+async function shrinkImage(file: File): Promise<Blob> {
+  if (file.type === "image/gif") return file;
+
+  let bitmap: ImageBitmap;
+  try {
+    bitmap = await createImageBitmap(file);
+  } catch {
+    throw new Error(`"${file.name}" could not be read. Use a JPG, PNG or WebP image.`);
+  }
+  const scale = Math.min(1, MAX_IMAGE_EDGE / Math.max(bitmap.width, bitmap.height));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.round(bitmap.width * scale);
+  canvas.height = Math.round(bitmap.height * scale);
+  canvas.getContext("2d")!.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  bitmap.close();
+
+  const encode = (type: string) =>
+    new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, type, 0.85));
+  const webp = await encode("image/webp");
+  if (webp && webp.type === "image/webp") return webp;
+  const jpeg = await encode("image/jpeg");
+  if (!jpeg) throw new Error(`"${file.name}" could not be processed.`);
+  return jpeg;
+}
+
 function slugify(text: string) {
   return text
     .toLowerCase()
@@ -62,6 +95,9 @@ export default function ProductForm({ product, open, onClose, onSaved }: Props) 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [imageUrl, setImageUrl] = useState("");
+  const [uploading, setUploading] = useState(0);
+  const [dragging, setDragging] = useState(false);
+  const [imageError, setImageError] = useState("");
 
   const isEdit = !!product?.id;
 
@@ -82,6 +118,7 @@ export default function ProductForm({ product, open, onClose, onSaved }: Props) 
       setMetadataText("{}");
     }
     setError("");
+    setImageError("");
   }, [product, open]);
 
   useEffect(() => {
@@ -143,6 +180,34 @@ export default function ProductForm({ product, open, onClose, onSaved }: Props) 
 
   function removeImage(index: number) {
     setForm((f) => ({ ...f, images: f.images.filter((_, i) => i !== index) }));
+  }
+
+  // The first image is the one shown in the shop grid
+  function makeMain(index: number) {
+    setForm((f) => ({ ...f, images: [f.images[index], ...f.images.filter((_, i) => i !== index)] }));
+  }
+
+  // Dropped or browsed files: shrink, upload to storage, then add to the product
+  async function uploadFiles(files: FileList | File[]) {
+    const images = Array.from(files).filter((f) => f.type.startsWith("image/"));
+    setImageError(images.length === 0 && files.length > 0 ? "Only image files can be added." : "");
+
+    for (const file of images) {
+      setUploading((n) => n + 1);
+      try {
+        const blob = await shrinkImage(file);
+        const body = new FormData();
+        body.append("file", new File([blob], file.name, { type: blob.type }));
+        body.append("folder", "products");
+        const res = await fetch("/api/admin/upload", { method: "POST", body });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.url) throw new Error(data.error || `"${file.name}" failed to upload.`);
+        setForm((f) => ({ ...f, images: [...f.images, data.url] }));
+      } catch (err: any) {
+        setImageError(err.message || `"${file.name}" failed to upload.`);
+      }
+      setUploading((n) => n - 1);
+    }
   }
 
   if (!open) return null;
@@ -298,12 +363,78 @@ export default function ProductForm({ product, open, onClose, onSaved }: Props) 
 
           {/* Images */}
           <div>
-            <label className="mb-1 block text-xs text-[#A3A3A3]">Images</label>
-            <div className="flex gap-2">
+            <span className="mb-1 block text-xs text-[#A3A3A3]">Images</span>
+            <label
+              onDragOver={(e) => {
+                e.preventDefault();
+                setDragging(true);
+              }}
+              onDragLeave={(e) => {
+                // Ignore leaving into the zone's own icon and text
+                if (!e.currentTarget.contains(e.relatedTarget as Node)) setDragging(false);
+              }}
+              onDrop={(e) => {
+                e.preventDefault();
+                setDragging(false);
+                uploadFiles(e.dataTransfer.files);
+              }}
+              className={`flex cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed px-4 py-6 text-center text-sm transition-colors focus-within:border-[#C8A84E] ${
+                dragging ? "border-[#C8A84E] bg-[#C8A84E]/5" : "border-[#262626] hover:border-[#C8A84E]/60"
+              }`}
+            >
+              <ImagePlus className="h-6 w-6 text-[#C8A84E]" />
+              <span className="text-[#F5F5F5]">
+                {uploading > 0 ? `Uploading ${uploading} image${uploading > 1 ? "s" : ""}...` : "Drag photos here or click to browse"}
+              </span>
+              <span className="text-xs text-[#A3A3A3]">JPG, PNG, WebP or GIF. Large photos are resized automatically.</span>
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                multiple
+                className="sr-only"
+                onChange={(e) => {
+                  if (e.target.files) uploadFiles(e.target.files);
+                  e.target.value = "";
+                }}
+              />
+            </label>
+            {imageError && <p className="mt-2 text-xs text-[#EF4444]">{imageError}</p>}
+
+            {form.images.length > 0 && (
+              <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-4">
+                {form.images.map((url, i) => (
+                  <div key={`${url}-${i}`} className="group relative aspect-square overflow-hidden rounded-lg border border-[#262626] bg-[#0A0A0A]">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={url} alt="" className="h-full w-full object-cover" />
+                    {i === 0 ? (
+                      <span className="absolute left-1 top-1 rounded bg-[#C8A84E] px-1.5 py-0.5 text-[10px] font-bold text-black">Main</span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => makeMain(i)}
+                        className="absolute left-1 top-1 rounded bg-black/70 px-1.5 py-0.5 text-[10px] text-white opacity-0 transition-opacity hover:bg-black group-hover:opacity-100 focus:opacity-100"
+                      >
+                        Make main
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => removeImage(i)}
+                      aria-label="Remove image"
+                      className="absolute right-1 top-1 rounded-full bg-black/70 p-1 text-white hover:bg-[#EF4444]"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="mt-3 flex gap-2">
               <input
                 value={imageUrl}
                 onChange={(e) => setImageUrl(e.target.value)}
-                placeholder="Image URL"
+                placeholder="Or paste an image URL"
                 className={inputClass}
               />
               <button
@@ -314,18 +445,6 @@ export default function ProductForm({ product, open, onClose, onSaved }: Props) 
                 Add
               </button>
             </div>
-            {form.images.length > 0 && (
-              <div className="mt-2 flex flex-wrap gap-2">
-                {form.images.map((url, i) => (
-                  <div key={i} className="flex items-center gap-1 rounded bg-[#262626] px-2 py-1 text-xs text-[#A3A3A3]">
-                    <span className="max-w-[150px] truncate">{url}</span>
-                    <button type="button" onClick={() => removeImage(i)} className="text-[#EF4444]">
-                      <X className="h-3 w-3" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
 
           <div>
@@ -344,10 +463,10 @@ export default function ProductForm({ product, open, onClose, onSaved }: Props) 
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || uploading > 0}
             className="w-full rounded-lg bg-[#C8A84E] py-3 font-bold text-black hover:bg-[#E8D48B] disabled:opacity-50"
           >
-            {loading ? "Saving..." : isEdit ? "Update Product" : "Create Product"}
+            {loading ? "Saving..." : uploading > 0 ? "Uploading images..." : isEdit ? "Update Product" : "Create Product"}
           </button>
         </form>
       </div>
