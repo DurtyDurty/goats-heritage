@@ -440,9 +440,10 @@ export default function ProductForm({ product, open, onClose, onSaved }: Props) 
               <button
                 type="button"
                 onClick={addImage}
-                className="rounded-lg bg-[#262626] px-3 text-sm text-white hover:bg-[#333]"
+                disabled={!imageUrl.trim()}
+                className="whitespace-nowrap rounded-lg bg-[#262626] px-3 text-sm text-white hover:bg-[#333] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-[#262626]"
               >
-                Add
+                Add URL
               </button>
             </div>
           </div>
