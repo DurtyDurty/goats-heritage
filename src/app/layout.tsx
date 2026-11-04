@@ -8,6 +8,9 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
+  // Without this, Next builds OG image URLs from the per-deployment Vercel URL,
+  // which is behind deployment protection and serves crawlers a login page.
+  metadataBase: new URL("https://goatsheritage.com"),
   title: "Goats Heritage™ | Premium Cigars & Lifestyle",
   description:
     "Premium cigars and exclusive lifestyle products. Elevating tradition with sophistication for the modern connoisseur.",
